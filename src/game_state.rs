@@ -1,4 +1,4 @@
-use macroquad::prelude::*;
+use egui_macroquad::macroquad::prelude::*;
 use crate::cell_state::CellState;
 
 pub struct GameState {
@@ -141,7 +141,7 @@ impl GameState {
 			self.generate();
 			i += 1;
 		}
-		println!("{}", i);
+		
 		i
 	}
 
