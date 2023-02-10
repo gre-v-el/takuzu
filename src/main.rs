@@ -54,6 +54,12 @@ async fn main() {
 				if ui.button("clear").clicked() {
 					state.reset();
 				}
+
+				if ui.button("degenerate").clicked() {
+					// state.separate_triples();
+
+					// TODO: degenerate tripples, desurround doubles, defill rows
+				}
 			});
 		});
 

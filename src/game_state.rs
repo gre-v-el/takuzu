@@ -254,7 +254,7 @@ impl GameState {
 			let mut last_last_state = CellState::None;
 
 			for c2 in 0..self.size {
-				if last_last_state == get(&self.map, c1, c2)  && last_last_state != CellState::None && last_state == CellState::None {
+				if last_last_state == get(&self.map, c1, c2) && last_last_state != CellState::None && last_state == CellState::None {
 					set(&mut self.map, c1, c2 - 1, last_last_state.inverse());
 					changed = true;
 				}
