@@ -319,4 +319,130 @@ impl GameState {
 
 		changed
 	}
+
+	
+	pub fn degenerate(&mut self) {
+		
+	}
+
+	pub fn deseparate_triples(&mut self, percentage: f32) -> bool {
+		let r = self.deseparate_triples_axis(
+			|v, y, x| v[y][x], 
+			|v, y, x, s| v[y][x] = s, percentage) |
+		self.deseparate_triples_axis(
+			|v, x, y| v[y][x], 
+			|v, x, y, s| v[y][x] = s, percentage);
+
+		r
+	}
+
+	pub fn deseparate_triples_axis<
+		F: Fn(&Vec<Vec<CellState>>, usize, usize) -> CellState,
+		G: Fn(&mut Vec<Vec<CellState>>, usize, usize, CellState) -> ()
+	>(&mut self, get: F, set: G, percentage: f32) -> bool {
+		let mut changed = false;
+
+		for c1 in 0..self.size {
+			let mut last_state = CellState::None;
+			let mut last_last_state = CellState::None;
+
+			for c2 in 0..self.size {
+				if last_last_state == get(&self.map, c1, c2) && last_last_state != CellState::None && last_state != CellState::None && rand::gen_range(0.0, 1.0) < percentage {
+					set(&mut self.map, c1, c2 - 1, CellState::None);
+					last_state = CellState::None;
+					changed = true;
+				}
+				last_last_state = last_state;
+				last_state = get(&self.map, c1, c2);
+			}
+		}
+
+		return changed;
+	}
+
+
+	
+	pub fn defill_row(&mut self, percentage: f32) -> bool {
+		let r = self.defill_row_axis(
+			|v, y, x| v[y][x], 
+			|v, y, x, s| v[y][x] = s, percentage) |
+		self.defill_row_axis(
+			|v, x, y| v[y][x], 
+			|v, x, y, s| v[y][x] = s, percentage);
+
+		r
+	}
+
+	pub fn defill_row_axis<
+		F: Fn(&Vec<Vec<CellState>>, usize, usize) -> CellState,
+		G: Fn(&mut Vec<Vec<CellState>>, usize, usize, CellState) -> ()
+	>(&mut self, get: F, set: G, percentage: f32) -> bool {
+
+		let mut changed = false;
+
+		for c1 in 0..self.size {
+			let mut trues = 0;
+			let mut falses = 0;
+
+			for c2 in 0..self.size {
+				match get(&self.map, c1, c2) {
+					CellState::False => falses += 1,
+					CellState::True => trues += 1,
+					CellState::None => {},
+				}
+			}
+
+			if trues == self.size/2 && falses == self.size/2 && rand::gen_range(0.0, 1.0) < percentage {
+				let to_delete = CellState::from_bool(rand::gen_range(0, 2) == 0);
+				for c2 in 0..self.size {
+					if get(&self.map, c1, c2) == to_delete {
+						set(&mut self.map, c1, c2, CellState::None);
+					}
+				}
+				changed = true;
+
+				println!("row deleted")
+			}
+		}
+
+		changed
+	}
+
+	pub fn desurround_doubles(&mut self, percentage: f32) -> bool {
+		let r = self.desurround_doubles_axis(
+			|v, y, x| v[y][x], 
+			|v, y, x, s| v[y][x] = s, percentage) |
+		self.desurround_doubles_axis(
+			|v, x, y| v[y][x], 
+			|v, x, y, s| v[y][x] = s, percentage);
+
+		r
+	}
+
+	pub fn desurround_doubles_axis<
+		F: Fn(&Vec<Vec<CellState>>, usize, usize) -> CellState,
+		G: Fn(&mut Vec<Vec<CellState>>, usize, usize, CellState) -> ()
+	>(&mut self, get: F, set: G, percentage: f32) -> bool {
+		let mut changed = false;
+
+		for c1 in 0..self.size {
+			let mut last_state = CellState::None;
+
+			for c2 in 0..self.size {
+				if last_state == get(&self.map, c1, c2) && last_state != CellState::None && rand::gen_range(0.0, 1.0) < percentage {
+					if c2 as i32 - 2 >= 0 {
+						set(&mut self.map, c1, c2 - 2, CellState::None);
+						changed = true;
+					}
+					if c2 + 1 < self.size  {
+						set(&mut self.map, c1, c2 + 1, CellState::None);
+						changed = true;
+					}
+				}
+				last_state = get(&self.map, c1, c2);
+			}
+		}
+
+		changed
+	}
 }
