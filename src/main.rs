@@ -1,25 +1,13 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 use macroquad::prelude::*;
-use takuzu::{game_state::GameState, cell_state::CellState};
+use takuzu::game_state::GameState;
 
 
 #[macroquad::main("binary sudoku")]
 async fn main() {
 	rand::srand(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as u64);
 
-	let mut state = GameState::new(6);
-
-	let mut i = 1;
-	state.generate();
-	while !state.is_valid {
-		state.reset();
-		state.generate();
-		i += 1;
-		if i % 100 == 0{
-			println!("{}", i);
-		}
-	}
-	println!("{}", i);
+	let mut state = GameState::new(8);
 
 
     loop {
@@ -28,7 +16,7 @@ async fn main() {
 		);
 
 		if is_key_pressed(KeyCode::G) {
-			state.generate();
+			state.generate_valid();
 		}
 		if is_key_pressed(KeyCode::U) {
 			state.surround_doubles();

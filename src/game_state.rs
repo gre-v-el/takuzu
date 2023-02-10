@@ -133,9 +133,21 @@ impl GameState {
 		}
 	}
 
+	pub fn generate_valid(&mut self) -> u32 {
+		let mut i = 1;
+		self.generate();
+		while !self.is_valid {
+			self.reset();
+			self.generate();
+			i += 1;
+		}
+		println!("{}", i);
+		i
+	}
+
 	pub fn generate(&mut self) {
 		while self.has_nones() {
-			while self.surround_doubles() | self.separate_triples() {}
+			while self.fill_row() | self.surround_doubles() | self.separate_triples() {}
 			self.insert_random();
 		}
 		self.verify_board();
@@ -143,6 +155,7 @@ impl GameState {
 
 	pub fn reset(&mut self) {
 		self.map = vec![vec![CellState::None; self.size]; self.size];
+		self.verify_board();
 	}
 
 	pub fn insert_random(&mut self) {
@@ -187,8 +200,6 @@ impl GameState {
 		self.surround_doubles_axis(
 			|v, x, y| v[y][x], 
 			|v, x, y, s| v[y][x] = s);
-		
-		self.verify_board();
 
 		r
 	}
@@ -227,8 +238,6 @@ impl GameState {
 		self.separate_triples_axis(
 			|v, x, y| v[y][x], 
 			|v, x, y, s| v[y][x] = s);
-		
-		self.verify_board();
 
 		r
 	}
@@ -266,8 +275,6 @@ impl GameState {
 		self.fill_row_axis(
 			|v, x, y| v[y][x], 
 			|v, x, y, s| v[y][x] = s);
-		
-		self.verify_board();
 
 		r
 	}
@@ -280,16 +287,33 @@ impl GameState {
 		let mut changed = false;
 
 		for c1 in 0..self.size {
-			let mut last_state = CellState::None;
-			let mut last_last_state = CellState::None;
+			let mut nones = 0;
+			let mut trues = 0;
+			let mut falses = 0;
 
 			for c2 in 0..self.size {
-				if last_last_state == get(&self.map, c1, c2)  && last_last_state != CellState::None && last_state == CellState::None {
-					set(&mut self.map, c1, c2 - 1, last_last_state.inverse());
-					changed = true;
+				match get(&self.map, c1, c2) {
+					CellState::False => falses += 1,
+					CellState::True => trues += 1,
+					CellState::None => nones += 1,
 				}
-				last_last_state = last_state;
-				last_state = get(&self.map, c1, c2);
+			}
+
+			if trues == self.size/2 && nones != 0 {
+				for c2 in 0..self.size {
+					if get(&self.map, c1, c2) == CellState::None {
+						set(&mut self.map, c1, c2, CellState::False);
+					}
+				}
+				changed = true;
+			}
+			if falses == self.size/2 && nones != 0 {
+				for c2 in 0..self.size {
+					if get(&self.map, c1, c2) == CellState::None {
+						set(&mut self.map, c1, c2, CellState::True);
+					}
+				}
+				changed = true;
 			}
 		}
 
