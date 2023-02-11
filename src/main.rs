@@ -40,10 +40,7 @@ async fn main() {
 
 		egui_macroquad::ui(|ctx| {
 			egui::Window::new("Controls").show(ctx, |ui| {
-				if ui.button("generate").clicked() {
-					tries = Some(state.generate_valid());
-				}
-
+				
 				if let Some(t) = tries {
 					ui.label(format!("tries: {}", t));
 				}
@@ -51,9 +48,37 @@ async fn main() {
 					ui.label("");
 				}
 
+				if ui.button("generate").clicked() {
+					tries = Some(state.generate_valid());
+				}
+				if ui.button("degenerate").clicked() {
+					state.degenerate();
+					state.verify_board();
+				}
+
+				ui.add_space(20.0);
+
 				if ui.button("clear").clicked() {
 					state.reset();
+					state.verify_board();
 				}
+
+				ui.add_space(20.0);
+
+				if ui.button("surround").clicked() {
+					state.surround_doubles();
+					state.verify_board();
+				}
+				if ui.button("fill").clicked() {
+					state.fill_row();
+					state.verify_board();
+				}
+				if ui.button("separate").clicked() {
+					state.separate_triples();
+					state.verify_board();
+				}
+
+				ui.add_space(20.0);
 
 				if ui.button("desurround").clicked() {
 					state.desurround_doubles(0.3);
@@ -64,6 +89,7 @@ async fn main() {
 				if ui.button("deseparate").clicked() {
 					state.deseparate_triples(0.3);
 				}
+
 			});
 		});
 

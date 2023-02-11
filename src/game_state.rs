@@ -1,6 +1,7 @@
 use egui_macroquad::macroquad::prelude::*;
 use crate::cell_state::CellState;
 
+#[derive(Clone)]
 pub struct GameState {
 	pub is_won: bool,
 	pub is_valid: bool,
@@ -322,7 +323,52 @@ impl GameState {
 
 	
 	pub fn degenerate(&mut self) {
-		
+		self.delete_percentage(0.3);
+		self.deseparate_triples(0.2);
+		self.desurround_doubles(0.2);
+		self.defill_row(0.2);
+		self.defill_row(1.0);
+		self.desurround_doubles(0.4);
+		self.deseparate_triples(0.5);
+		self.desurround_doubles(1.0);
+		self.deseparate_triples(1.0);
+
+
+		self.verify_board();
+
+		println!("{}", self.is_solvable());
+	}
+
+	pub fn is_solvable(&self) -> bool {
+		let mut clone = self.clone();
+
+		while clone.surround_doubles() | clone.separate_triples() | clone.fill_row() {}
+
+		clone.verify_board();
+
+		clone.is_won
+	}
+
+	pub fn delete_percentage(&mut self, percentage: f32) {
+		for y in 0..self.size {
+			for x in 0..self.size {
+				if rand::gen_range(0.0, 1.0) < percentage {
+					self.map[y][x] = CellState::None;
+				}
+			}
+		}
+	}
+
+	pub fn copy_nones(&mut self, other: &Self) {
+		if other.size != self.size {return;}
+
+		for y in 0..self.size {
+			for x in 0..self.size {
+				if other.map[y][x] == CellState::None {
+					self.map[y][x] = CellState::None;
+				}
+			}
+		}
 	}
 
 	pub fn deseparate_triples(&mut self, percentage: f32) -> bool {
@@ -400,8 +446,6 @@ impl GameState {
 					}
 				}
 				changed = true;
-
-				println!("row deleted")
 			}
 		}
 
