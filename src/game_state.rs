@@ -126,10 +126,18 @@ impl GameState {
 	}
 
 	pub fn draw(&self) {
-		let m = 0.02;
+		let m = 0.03;
+		let b = 0.1;
 		for (y, row) in self.map.iter().enumerate() {
 			for (x, cell) in row.iter().enumerate() {
-				draw_rectangle(x as f32 + m, y as f32 + m, 1.0 - 2.0 * m, 1.0 - 2.0 * m, cell.col());
+				let col = cell.col();
+				draw_rectangle(x as f32 + m + b, y as f32 + m, 1.0 - 2.0 * m - 2.0*b, 1.0 - 2.0 * m, cell.col());
+				draw_rectangle(x as f32 + m, y as f32 + m + b, 1.0 - 2.0 * m, 1.0 - 2.0 * m - 2.0 * b, cell.col());
+
+				draw_circle(x as f32 + m + b, 		y as f32 + m + b, b, col);
+				draw_circle(x as f32 + 1.0 - m - b, y as f32 + m + b, b, col);
+				draw_circle(x as f32 + m + b,		y as f32 + 1.0 - m - b, b, col);
+				draw_circle(x as f32 + 1.0 - m - b, y as f32 + 1.0 - m - b, b, col);
 			}
 		}
 	}
