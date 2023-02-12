@@ -8,7 +8,7 @@ use takuzu::game_state::GameState;
 async fn main() {
 	rand::srand(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as u64);
 
-	let mut state = GameState::new(8);
+	let mut state = GameState::new(20);
 	let mut tries = None;
 
     loop {
@@ -38,6 +38,9 @@ async fn main() {
 				if ui.button("degenerate").clicked() {
 					state.degenerate();
 					state.verify_board();
+				}
+				if ui.button("purge").clicked() {
+					state.purge_redundancies();
 				}
 
 				ui.add_space(20.0);

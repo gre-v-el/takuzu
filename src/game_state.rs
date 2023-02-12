@@ -180,14 +180,7 @@ impl GameState {
 	}
 
 	pub fn insert_random(&mut self) {
-		let mut nones = 0;
-		for y in 0..self.size {
-			for x in 0..self.size {
-				if self.map[y][x] == CellState::None {
-					nones += 1;
-				}
-			}
-		}
+		let nones = self.count_nones() as i32;
 
 		if nones == 0 {
 			return;
@@ -199,7 +192,7 @@ impl GameState {
 		loop {
 			if self.map[y][x] == CellState::None {
 				index -= 1;
-				if index < 0 {
+				if index <= 0 {
 					break;
 				}
 			}
@@ -343,7 +336,6 @@ impl GameState {
 
 	
 	pub fn degenerate(&mut self) {
-		self.delete_percentage(0.3);
 		self.deseparate_triples(0.2);
 		self.desurround_doubles(0.2);
 		self.defill_row(0.2);
@@ -355,8 +347,6 @@ impl GameState {
 
 
 		self.verify_board();
-
-		println!("{}", self.is_solvable());
 	}
 
 	pub fn is_solvable(&self) -> bool {
@@ -512,6 +502,7 @@ impl GameState {
 
 	pub fn purge_redundancies(&mut self) {
 		while self.delete_one() {}
+		self.verify_board();
 	}
 	
 	pub fn delete_one(&mut self) -> bool {
