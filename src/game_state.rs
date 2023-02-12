@@ -65,6 +65,18 @@ impl GameState {
 		false
 	}
 
+	pub fn count_nones(&self) -> u32 {
+		let mut counter = 0;
+		for row in &self.map {
+			for cell in row {
+				if *cell == CellState::None {
+					counter += 1;
+				}
+			}
+		}
+		counter
+	}
+
 	pub fn verify_board(&mut self) {
 		self.is_valid = 
 			self.verify_board_axis(|v, x, y| v[y][x]) &&
@@ -496,5 +508,40 @@ impl GameState {
 		}
 
 		changed
+	}
+
+	pub fn purge_redundancies(&mut self) {
+		while self.delete_one() {}
+	}
+	
+	pub fn delete_one(&mut self) -> bool {
+		let mut to_delete = Vec::new();
+
+		for y in 0..self.size {
+			for x in 0..self.size {
+				if self.map[y][x] != CellState::None {
+					let temp = self.map[y][x];
+
+					self.map[y][x] = CellState::None;
+
+					if self.is_solvable() {
+						to_delete.push((x, y));
+					}
+
+					self.map[y][x] = temp;
+				}
+			}
+		}
+
+		if to_delete.len() == 0 {
+			return false;
+		}
+
+		use egui_macroquad::macroquad::rand::ChooseRandom;
+		let coords = to_delete.choose().unwrap();
+
+		self.map[coords.1][coords.0] = CellState::None;
+
+		true
 	}
 }
