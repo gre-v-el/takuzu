@@ -2,6 +2,7 @@
 ## A Rust implementation of Takuzu - a binary version of sudoku
 
 [todo: screenshot]
+(colorscheme inspired by 0h h1)
 
 Takuzu is played on a square board with NxN cells, where N must be even. Cells can be either true, false, or not yet assigned 
 

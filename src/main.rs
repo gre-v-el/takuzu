@@ -3,6 +3,17 @@ use egui_macroquad::{macroquad, egui};
 use macroquad::prelude::*;
 use takuzu::game_state::GameState;
 
+/*
+	TODO:
+		add tile locking (the user cannot change a generated tile)
+		let the user know which tiles are locked
+		make some menus, separate for "serious play", separate for sandbox and separate for learning
+		some high scores?
+		possibly switch to macroquad's ui so it can be compiled for android
+		add timing
+		come up with a difficulty metric and decide what is better: PURGE vs DEGENERATE + PURGE
+		improve solving with the last rule
+*/
 
 #[macroquad::main("binary sudoku")]
 async fn main() {
