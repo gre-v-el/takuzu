@@ -1,5 +1,5 @@
 use egui_macroquad::macroquad::prelude::*;
-use crate::{cell_state::CellState, utils::{draw_round_rect, rect_circumscribed_on_rect}};
+use crate::{cell_state::CellState, utils::draw_round_rect};
 
 #[derive(Clone)]
 pub struct Board {
@@ -21,27 +21,12 @@ impl Board {
 		s
 	}
 
-	pub fn camera(&self) -> Camera2D {
-		// (0,0) to (1,1) is the board. Depending on the aspect ratio: vertical will have space at the bottom and horizontal will have space at the top for some ui.
-
-		if screen_width() / screen_height() > 1.0 {
-			Camera2D::from_display_rect(
-				rect_circumscribed_on_rect(Rect{x: -0.1, y: -0.1, w: 1.7, h: 1.2}, screen_width()/screen_height())
-			)
-		}
-		else {
-			Camera2D::from_display_rect(
-				rect_circumscribed_on_rect(Rect{x: -0.1, y: -0.1, w: 1.2, h: 1.7}, screen_width()/screen_height())
-			)
-		}
-	}
-
-	pub fn handle_mouse(&mut self) {
+	pub fn handle_mouse(&mut self, camera: &Camera2D) {
 		if !is_mouse_button_pressed(MouseButton::Left) && !is_mouse_button_pressed(MouseButton::Right) {
 			return;
 		}
 
-		let (x, y) = (self.camera().screen_to_world(mouse_position().into()) * self.size as f32).into();
+		let (x, y) = (camera.screen_to_world(mouse_position().into()) * self.size as f32).into();
 
 		if x < 0.0 || y < 0.0  || x >= self.size as f32 || y >= self.size as f32 {
 			return;
@@ -170,7 +155,7 @@ impl Board {
 
 	pub fn generate(&mut self) {
 		while self.has_nones() {
-			while self.fill_row() | self.surround_doubles() | self.separate_triples() {}
+			while self.fill_rows() | self.surround_doubles() | self.separate_triples() {}
 			self.insert_random();
 		}
 		self.verify_board();
@@ -284,7 +269,7 @@ impl Board {
 
 	
 
-	pub fn fill_row(&mut self) -> bool {
+	pub fn fill_rows(&mut self) -> bool {
 		let r = self.fill_row_axis(
 			|v, y, x| v[y][x], 
 			|v, y, x, s| v[y][x] = s) |
@@ -340,8 +325,8 @@ impl Board {
 	pub fn degenerate(&mut self) {
 		self.deseparate_triples(0.2);
 		self.desurround_doubles(0.2);
-		self.defill_row(0.2);
-		self.defill_row(1.0);
+		self.defill_rows(0.2);
+		self.defill_rows(1.0);
 		self.desurround_doubles(0.4);
 		self.deseparate_triples(0.5);
 		self.desurround_doubles(1.0);
@@ -354,7 +339,7 @@ impl Board {
 	pub fn is_solvable(&self) -> bool {
 		let mut clone = self.clone();
 
-		while clone.surround_doubles() | clone.separate_triples() | clone.fill_row() {}
+		while clone.surround_doubles() | clone.separate_triples() | clone.fill_rows() {}
 
 		clone.verify_board();
 
@@ -420,7 +405,7 @@ impl Board {
 
 
 	
-	pub fn defill_row(&mut self, percentage: f32) -> bool {
+	pub fn defill_rows(&mut self, percentage: f32) -> bool {
 		let r = self.defill_row_axis(
 			|v, y, x| v[y][x], 
 			|v, y, x, s| v[y][x] = s, percentage) |

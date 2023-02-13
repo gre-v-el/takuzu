@@ -35,8 +35,8 @@ pub fn draw_round_rect(x: f32, y: f32, w: f32, h: f32, r: f32, col: Color) {
 	draw_circle(x + w - r, 	y + h - r, 	r, col);
 }
 
-pub fn button(rect: &Rect, mut col: Color, text: &str, camera: &Camera2D, font: Font) -> bool {
 
+pub fn button(rect: &Rect, mut col: Color, text: &str, camera: &Camera2D, font: Font, scale: f32) -> bool {
 	let mouse = camera.screen_to_world(mouse_position().into());
 	if rect.contains(mouse) && is_mouse_button_down(MouseButton::Left) {
 		col.r -= 0.1;
@@ -50,12 +50,12 @@ pub fn button(rect: &Rect, mut col: Color, text: &str, camera: &Camera2D, font: 
 	}
 	draw_round_rect(rect.x, rect.y, rect.w, rect.h, 0.01, col);
 
-	let dims = measure_text(text, Some(font), 64, 0.001);
+	let dims = measure_text(text, Some(font), 128, 1.0/128.0 * scale);
 
- 	draw_text_ex(text, rect.center().x - dims.width/2.0, rect.center().y + rect.h/2.0 - dims.height/2.0, TextParams { 
+ 	draw_text_ex(text, rect.center().x - dims.width/2.0, rect.center().y + dims.height/2.0, TextParams { 
 		font: font, 
 		font_size: 128, 
-		font_scale: 0.0005, 
+		font_scale: 1.0/128.0 * scale, 
 		font_scale_aspect: 1.0, 
 		rotation: 0.0, 
 		color: WHITE 
