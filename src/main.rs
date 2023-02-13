@@ -1,7 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-use egui_macroquad::{macroquad, egui};
-use macroquad::prelude::*;
-use takuzu::{board::Board, state::State};
+use egui_macroquad::macroquad::{self, prelude::*};
+use takuzu::state::State;
 
 /*
 	TODO:
@@ -16,7 +15,7 @@ use takuzu::{board::Board, state::State};
 */
 
 
-#[macroquad::main("binary sudoku")]
+#[macroquad::main("Takuzu")]
 async fn main() {
 	rand::srand(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as u64);
 
