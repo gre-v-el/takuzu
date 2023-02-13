@@ -15,16 +15,17 @@ use takuzu::{board::Board, state::State};
 		improve solving with the last rule
 */
 
+
 #[macroquad::main("binary sudoku")]
 async fn main() {
 	rand::srand(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as u64);
 
 	// let mut state = State::Game(Board::new(8), None);
 	let mut state = State::MainMenu;
+	let font = load_ttf_font_from_bytes(takuzu::FONT).unwrap();
 
     loop {
-		
-		if let Some(s) = state.update() {
+		if let Some(s) = state.update(font) {
 			state = s;
 		}
 
