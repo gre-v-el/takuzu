@@ -6,7 +6,9 @@ pub struct Board {
 	pub is_won: bool,
 	pub is_valid: bool,
 	pub size: usize,
-	pub map: Vec<Vec<CellState>>
+	pub map: Vec<Vec<CellState>>,
+	pub error: [Option<(usize, usize, usize, usize)>; 2], // up to two regions on the board
+	pub hint: Option<(usize, usize)>
 }
 
 impl Board {
@@ -15,7 +17,9 @@ impl Board {
 			is_won: false,
 			is_valid: true,
 			size,
-			map: vec![vec![CellState::None; size]; size]
+			map: vec![vec![CellState::None; size]; size],
+			error: [None; 2],
+			hint: None,
 		};
 
 		s
@@ -25,6 +29,8 @@ impl Board {
 		if !is_mouse_button_pressed(MouseButton::Left) && !is_mouse_button_pressed(MouseButton::Right) {
 			return;
 		}
+
+		self.hint = None;
 
 		let (x, y) = (camera.screen_to_world(mouse_position().into()) * self.size as f32).into();
 
@@ -67,15 +73,55 @@ impl Board {
 		counter
 	}
 
+	pub fn generate_hint(&mut self) {
+		let mut vec = Vec::new();
+		let mut clone = self.clone();
+		if clone.surround_doubles() || clone.separate_triples() || clone.fill_rows() {
+			for y in 0..self.size {
+				for x in 0..self.size {
+					if self.map[y][x] == CellState::None && clone.map[y][x] != CellState::None {
+						vec.push((x, y));
+					}
+				}
+			}
+		}
+
+		if vec.len() != 0 {
+			use rand::ChooseRandom;
+			self.hint = Some(*vec.choose().unwrap());
+		}
+	}
+
 	pub fn verify_board(&mut self) {
-		self.is_valid = 
-			self.verify_board_axis(|v, x, y| v[y][x]) &&
-			self.verify_board_axis(|v, y, x| v[y][x]);
+		let mut resp1 = self.get_errors_axis(|v, x, y| v[y][x]);
+		let resp2 = self.get_errors_axis(|v, y, x| v[y][x]);
+
+		self.is_valid = resp1[0].is_none() && resp2[0].is_none();
+
+		if resp1[0].is_some() {
+			let err = resp1[0].unwrap();
+			let err = (err.1, err.0, err.3, err.2);
+			resp1[0] = Some(err);
+
+			if let Some(err) = resp1[1] {
+				let err = (err.1, err.0, err.3, err.2);
+				resp1[1] = Some(err);
+			}
+
+			self.error = resp1;
+		}
+		else if resp2[0].is_some() {
+			self.error = resp2;
+		}
+		else {
+			self.error = [None; 2];
+		}
+
 		self.is_won = !self.has_nones() && self.is_valid;
 	}
 
-	pub fn verify_board_axis<F : Fn(&Vec<Vec<CellState>>, usize, usize) -> CellState>(&mut self, get: F) -> bool { 
-		// check triplets and counts
+	// returns up to two errors
+	pub fn get_errors_axis<F : Fn(&Vec<Vec<CellState>>, usize, usize) -> CellState>(&mut self, get: F) -> [Option<(usize, usize, usize, usize)>; 2] { 
 		for c1 in 0..self.size {
 			let mut trues = 0;
 			let mut falses = 0;
@@ -100,12 +146,12 @@ impl Board {
 				}
 
 				if counter > 2 && state != CellState::None {
-					return false;
+					return [Some((c2-2, c1, 3, 1)), None];
 				}
 			}
 
 			if nones == 0 && falses != trues {
-				return false;
+				return [Some((0, c1, self.size, 1)), None];
 			}
 		}
 
@@ -119,16 +165,16 @@ impl Board {
 				}
 
 				if are_same && !any_nones {
-					return false;
+					return [Some((0, c1_1, self.size, 1)), Some((0, c1_2, self.size, 1))];
 				}
 			}
 		}
 
-		return true;
+		return [None; 2];
 	}
 
 	pub fn draw(&self) {
-		let m = 0.03 / self.size as f32;
+		let m = 0.05 / self.size as f32;
 		let b = 0.1 / self.size as f32;
 		let w = 1.0 / self.size as f32;
 		for (y, row) in self.map.iter().enumerate() {
@@ -139,6 +185,43 @@ impl Board {
 				draw_round_rect(x + m, y + m, w - 2.0*m, w - 2.0*m, b, color);
 			}
 		}
+	}
+
+	pub fn draw_hint(&self) {
+		if let Some((x, y)) = self.hint {
+			let m = 0.05 / self.size as f32;
+			let b = 0.13 / self.size as f32;
+			draw_round_rect(
+				x as f32 / self.size as f32 - m, 
+				y as f32 / self.size as f32 - m, 
+				1.0 / self.size as f32 + 2.0*m, 
+				1.0 as f32 / self.size as f32 + 2.0*m, 
+				b, 
+				WHITE
+			);
+		}
+	}
+
+	pub fn draw_errors(&self) {
+		if let Some(e) = self.error[0] {
+			self.draw_error(&e);
+		}
+		if let Some(e) = self.error[1] {
+			self.draw_error(&e);
+		}
+	}
+
+	fn draw_error(&self, e: &(usize, usize, usize, usize)) {
+		let m = 0.05 / self.size as f32;
+		let b = 0.13 / self.size as f32;
+		draw_round_rect(
+			e.0 as f32 / self.size as f32 - m, 
+			e.1 as f32 / self.size as f32 - m, 
+			e.2 as f32 / self.size as f32 + 2.0*m, 
+			e.3 as f32 / self.size as f32 + 2.0*m, 
+			b, 
+			RED
+		);
 	}
 
 	pub fn generate_valid(&mut self) -> u32 {

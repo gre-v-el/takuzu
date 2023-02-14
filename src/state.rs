@@ -29,7 +29,11 @@ impl State {
 					ret = Some(State::Sandbox(Board::new(8), None));
 				}
 				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) {
-					ret = Some(State::Learn(Board::new(8)));
+					let mut board = Board::new(8);
+					board.generate_valid();
+					board.degenerate();
+					board.purge_redundancies();
+					ret = Some(State::Learn(board));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) {
 					ret = Some(State::Serious(Board::new(8)));
@@ -69,6 +73,8 @@ impl State {
 				}
 
 				board.handle_mouse(&camera);
+				board.draw_errors();
+				board.draw_hint();
 				board.draw();
 				
 
@@ -159,6 +165,43 @@ impl State {
 				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) {
 					ret = Some(State::MainMenu);
 				}
+				if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Hint", &camera, font, 0.06) {
+					board.generate_hint();
+				}
+			}
+			Self::Learn(board) => {
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.2 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+				let status_color = if board.is_won {Some(GREEN)} else if board.is_valid {None} else {Some(RED)};
+
+				if let Some(c) = status_color {
+					let w = 0.2;
+					draw_texture_ex(assets.gradient, display_rect.left(), display_rect.top(), c, 
+						DrawTextureParams { 
+							source: Some(Rect{x: 0.5, y: 0.0, w: 1.0, h: 1.0}),
+							dest_size: Some(vec2(w, display_rect.h)),
+							pivot: Some(display_rect.center()),
+							rotation: PI,
+							..Default::default()
+						});
+					draw_texture_ex(assets.gradient, display_rect.left(), display_rect.top(), c, 
+						DrawTextureParams { 
+							source: Some(Rect{x: 0.5, y: 0.0, w: 1.0, h: 1.0}),
+							dest_size: Some(vec2(w, display_rect.h)),
+							..Default::default()
+						});
+				}
+
+				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) {
+					ret = Some(State::MainMenu);
+				}
+
+				board.handle_mouse(&camera);
+				board.draw_errors();
+				board.draw();
+
 			}
 			_ => {}
 		}
