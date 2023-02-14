@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::{board::Board, utils::{rect_circumscribed_on_rect, button}, Assets};
 use egui_macroquad::macroquad::prelude::*;
 
@@ -34,23 +36,37 @@ impl State {
 				}
 			}
 			Self::Sandbox(board, tries) => {
-				clear_background(
-					if board.is_won {GREEN} else if board.is_valid {BLACK} else {RED}
-				);
 		
 				// (0,0) to (1,1) is the board. Depending on the aspect ratio: vertical will have space at the bottom and horizontal will have space to the left for some ui. Also allocate space at the top for exit and timer
-				let camera = 
-				if screen_width() / screen_height() > 1.0 {
-					Camera2D::from_display_rect(
-						rect_circumscribed_on_rect(Rect{x: -0.8, y: -0.2, w: 1.9, h: 1.3}, screen_width()/screen_height())
-					)
+				let allocated_rect = if screen_width() / screen_height() > 1.0 {
+					Rect{x: -0.8, y: -0.2, w: 1.9, h: 1.3}
 				}
 				else {
-					Camera2D::from_display_rect(
-						rect_circumscribed_on_rect(Rect{x: -0.1, y: -0.2, w: 1.2, h: 1.6}, screen_width()/screen_height())
-					)
+					Rect{x: -0.1, y: -0.2, w: 1.2, h: 1.6}
 				};
+				let display_rect = rect_circumscribed_on_rect(allocated_rect, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
+
+				let status_color = if board.is_won {Some(GREEN)} else if board.is_valid {None} else {Some(RED)};
+
+				if let Some(c) = status_color {
+					let w = 0.2;
+					draw_texture_ex(assets.gradient, display_rect.left(), display_rect.top(), c, 
+						DrawTextureParams { 
+							source: Some(Rect{x: 0.5, y: 0.0, w: 1.0, h: 1.0}),
+							dest_size: Some(vec2(w, display_rect.h)),
+							pivot: Some(display_rect.center()),
+							rotation: PI,
+							..Default::default()
+						});
+					draw_texture_ex(assets.gradient, display_rect.left(), display_rect.top(), c, 
+						DrawTextureParams { 
+							source: Some(Rect{x: 0.5, y: 0.0, w: 1.0, h: 1.0}),
+							dest_size: Some(vec2(w, display_rect.h)),
+							..Default::default()
+						});
+				}
 
 				board.handle_mouse(&camera);
 				board.draw();
