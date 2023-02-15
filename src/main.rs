@@ -12,7 +12,6 @@ use takuzu::{state::State, Assets, Persistance};
 		change colors
 
 		Learn/Serious endscreen
-		Exit confirmation
 */
 
 fn window_config() -> Conf {
@@ -42,7 +41,7 @@ async fn main() {
 	};
 
     loop {
-		if let Some(s) = state.update(&mut assets) {
+		if let Some(s) = state.update(&mut assets, true) {
 			state = s;
 		}
 

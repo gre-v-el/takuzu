@@ -1,20 +1,22 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable}, Assets};
+use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text}, Assets};
 use egui_macroquad::macroquad::prelude::*;
 
+#[derive(Clone)]
 pub enum State {
 	MainMenu,
 	Sandbox(Board, Option<u32>),
 	Learn(Board),
 	Serious(Board, f32, Option<f32>), // start time, finished time
+	ExitConfirmation(Box<State>),
 	// Settings,
 	// Highscores,
 	// DifficultyChoice, 
 }
 
 impl State {
-	pub fn update(&mut self, assets: &mut Assets) -> Option<State> {
+	pub fn update(&mut self, assets: &mut Assets, handle_mouse: bool) -> Option<State> {
 		let font = assets.font;
 		let mut ret = None;
 		match self {
@@ -27,10 +29,10 @@ impl State {
 
 				clear_background(BLACK);
 
-				if button(&Rect{x: 0.3, y: 0.2, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) {
+				if button(&Rect{x: 0.3, y: 0.2, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) && handle_mouse {
 					ret = Some(State::Sandbox(Board::new(4), None));
 				}
-				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) {
+				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(4);
 					board.generate_valid();
 					board.degenerate();
@@ -38,7 +40,7 @@ impl State {
 					board.lock_tiles();
 					ret = Some(State::Learn(board));
 				}
-				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) {
+				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(4);
 					board.generate_valid();
 					board.purge_redundancies();
@@ -79,13 +81,13 @@ impl State {
 						});
 				}
 
-				board.handle_mouse(&camera);
+				if handle_mouse {
+					board.handle_mouse(&camera);
+				}
 				board.draw_errors();
 				board.draw_hint();
 				board.draw();
 				
-
-				// todo: show tries
 				let scale = 0.04;
 				let buttons = if screen_width() / screen_height() > 1.0 {
 					let w = 0.32;
@@ -130,50 +132,50 @@ impl State {
 					]
 				};
 				
-				if button(&buttons[0], GRAY, "Generate", &camera, font, scale) {
+				if button(&buttons[0], GRAY, "Generate", &camera, font, scale) && handle_mouse {
 					*tries = Some(board.generate_valid());
 				}
-				if button(&buttons[1], GRAY, "Purge some", &camera, font, scale) {
+				if button(&buttons[1], GRAY, "Purge some", &camera, font, scale) && handle_mouse {
 					board.degenerate();
 					board.verify_board();
 				}
-				if button(&buttons[2], GRAY, "Purge all", &camera, font, scale) {
+				if button(&buttons[2], GRAY, "Purge all", &camera, font, scale) && handle_mouse {
 					board.purge_redundancies();
 					board.verify_board();
 				}
-				if button(&buttons[3], GRAY, "Clear", &camera, font, scale) {
+				if button(&buttons[3], GRAY, "Clear", &camera, font, scale) && handle_mouse {
 					board.reset();
 				}
-				if button(&buttons[4], GRAY, "Surround", &camera, font, scale) {
+				if button(&buttons[4], GRAY, "Surround", &camera, font, scale) && handle_mouse {
 					board.surround_doubles();
 					board.verify_board();
 				}
-				if button(&buttons[5], GRAY, "De-Surround", &camera, font, scale) {
+				if button(&buttons[5], GRAY, "De-Surround", &camera, font, scale) && handle_mouse {
 					board.desurround_doubles(1.0);
 					board.verify_board();
 				}
-				if button(&buttons[6], GRAY, "Separate", &camera, font, scale) {
+				if button(&buttons[6], GRAY, "Separate", &camera, font, scale) && handle_mouse {
 					board.separate_triples();
 					board.verify_board();
 				}
-				if button(&buttons[7], GRAY, "De-Separate", &camera, font, scale) {
+				if button(&buttons[7], GRAY, "De-Separate", &camera, font, scale) && handle_mouse {
 					board.deseparate_triples(1.0);
 					board.verify_board();
 				}
-				if button(&buttons[8], GRAY, "Fill", &camera, font, scale) {
+				if button(&buttons[8], GRAY, "Fill", &camera, font, scale) && handle_mouse {
 					board.fill_rows();
 					board.verify_board();
 				}
-				if button(&buttons[9], GRAY, "De-Fill", &camera, font, scale) {
+				if button(&buttons[9], GRAY, "De-Fill", &camera, font, scale) && handle_mouse {
 					board.defill_rows(1.0);
 					board.verify_board();
 				}
 
-				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) {
-					ret = Some(State::MainMenu);
-				}
-				if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Hint", &camera, font, 0.06) {
+				if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Hint", &camera, font, 0.06) && handle_mouse {
 					board.generate_hint();
+				}
+				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) && handle_mouse {
+					ret = Some(State::ExitConfirmation(Box::new(self.clone())));
 				}
 			}
 			Self::Learn(board) => {
@@ -201,17 +203,18 @@ impl State {
 						});
 				}
 
-				
-				board.handle_mouse(&camera);
+				if handle_mouse {
+					board.handle_mouse(&camera);
+				}				
 				board.draw_errors();
 				board.draw_hint();
 				board.draw();
 
-				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) {
-					ret = Some(State::MainMenu);
-				}
-				if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Hint", &camera, font, 0.06) {
+				if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Hint", &camera, font, 0.06) && handle_mouse {
 					board.generate_hint();
+				}
+				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) && handle_mouse {
+					ret = Some(State::ExitConfirmation(Box::new(self.clone())));
 				}
 
 			}
@@ -253,14 +256,39 @@ impl State {
 					draw_centered_text_stable(vec2(i as f32 * 0.07 + 0.04, -0.1), [c].iter().collect::<String>().as_str(), "0", font, 0.1);
 				}
 
-				
-				board.handle_mouse(&camera);
+				if handle_mouse {
+					board.handle_mouse(&camera);
+				}
 				board.draw();
 
-				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) {
-					ret = Some(State::MainMenu);
+				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) && handle_mouse {
+					ret = Some(State::ExitConfirmation(Box::new(self.clone())));
 				}
 
+			}
+			Self::ExitConfirmation(inner_state) => {
+				inner_state.update(assets, false);
+				
+				let allocated_rect = Rect {x: 0.0, y: 0.0, w: 1.0, h: 1.0};
+				let display_rect = rect_circumscribed_on_rect(allocated_rect, screen_width()/screen_height());
+
+				let cam = Camera2D::from_display_rect(display_rect);
+				set_camera(&cam);
+
+				draw_rectangle(display_rect.x, display_rect.y, display_rect.w, display_rect.h, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.8 });
+
+				let m = 0.01;
+				draw_round_rect(0.2-m, 0.3-m, 0.6+2.0*m, 0.4+2.0*m, 0.05+m, BLACK);
+				draw_round_rect(0.2, 0.3, 0.6, 0.4, 0.05, DARKGRAY);
+
+				draw_centered_text(allocated_rect.center() - vec2(0.0, 0.1), "Exit?", font, 0.1);
+
+				if button(&Rect { x: 0.25, y: 0.55, w: 0.2, h: 0.1 }, GRAY, "Yes", &cam, font, 0.07) {
+					ret = Some(State::MainMenu);
+				}
+				if button(&Rect { x: 0.55, y: 0.55, w: 0.2, h: 0.1 }, GRAY, "No", &cam, font, 0.07) {
+					ret = Some((**inner_state).clone());
+				}
 			}
 		}
 
