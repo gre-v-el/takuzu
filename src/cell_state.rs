@@ -46,10 +46,16 @@ impl CellState {
 	pub fn col(&self) -> Color {
 		match self {
 			CellState::None => GRAY,
-			CellState::False(false) => BLUE,
-			CellState::True(false) => YELLOW,
-			CellState::False(true) => DARKBLUE,
-			CellState::True(true) => ORANGE,
+			CellState::False(_) => BLUE,
+			CellState::True(_) => YELLOW,
+		}
+	}
+
+	pub fn is_locked(&self) -> bool {
+		match self {
+			Self::None => false,
+			Self::False(b) => *b,
+			Self::True(b) => *b,
 		}
 	}
 }

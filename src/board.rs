@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use egui_macroquad::macroquad::prelude::*;
 use crate::{cell_state::CellState, utils::draw_round_rect};
 
@@ -8,7 +10,8 @@ pub struct Board {
 	pub size: usize,
 	pub map: Vec<Vec<CellState>>,
 	pub error: [Option<(usize, usize, usize, usize)>; 2], // up to two regions on the board
-	pub hint: Option<(usize, usize)>
+	pub hint: Option<(usize, usize)>,
+	pub show_locked: Option<f32>,
 }
 
 impl Board {
@@ -20,6 +23,7 @@ impl Board {
 			map: vec![vec![CellState::None; size]; size],
 			error: [None; 2],
 			hint: None,
+			show_locked: None,
 		};
 
 		s
@@ -39,6 +43,11 @@ impl Board {
 		}
 
 		let (x, y) = (x as usize, y as usize);
+
+		if self.map[y][x].is_locked() {
+			self.show_locked = Some(get_time() as f32);
+			return;
+		}
 
 		if is_mouse_button_down(MouseButton::Left) {
 			self.map[y][x] = self.map[y][x].next();
@@ -185,7 +194,7 @@ impl Board {
 		return [None; 2];
 	}
 
-	pub fn draw(&self) {
+	pub fn draw(&mut self) {
 		let m = 0.05 / self.size as f32;
 		let b = 0.1 / self.size as f32;
 		let w = 1.0 / self.size as f32;
@@ -195,6 +204,24 @@ impl Board {
 				let x = x as f32 / self.size as f32;
 				let y = y as f32 / self.size as f32;
 				draw_round_rect(x + m, y + m, w - 2.0*m, w - 2.0*m, b, color);
+			}
+		}
+		
+		if let Some(t) = self.show_locked {
+			let passed = get_time() as f32 - t;
+			if passed > 2.0 {
+				self.show_locked = None;
+			}
+
+			for y in 0..self.size {
+				for x in 0..self.size {
+					if self.map[y][x].is_locked() {
+						let col = Color { r: 0.0, g: 0.0, b: 0.0, a: 0.5 - 0.5*(2.0*PI*passed).cos() };
+						let x = x as f32 / self.size as f32;
+						let y = y as f32 / self.size as f32;
+						draw_circle(x + w*0.5, y + w*0.5, w*0.2, col);
+					}
+				}
 			}
 		}
 	}
