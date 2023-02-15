@@ -1,4 +1,4 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{time::{SystemTime, UNIX_EPOCH}, collections::HashMap};
 use egui_macroquad::macroquad::{self, prelude::*};
 use takuzu::{state::State, Assets, Persistance};
 
@@ -9,8 +9,10 @@ use takuzu::{state::State, Assets, Persistance};
 		let the user choose board size
 		come up with a difficulty metric and decide what is better: PURGE vs DEGENERATE + PURGE
 		improve solving with the last rule
-		100 secs doesnt show up
 		change colors
+
+		Learn/Serious endscreen
+		Exit confirmation
 */
 
 fn window_config() -> Conf {
@@ -29,7 +31,7 @@ async fn main() {
 
 	let mut state = State::MainMenu;
 	let persistance = Persistance {
-		highscores: Vec::new(),
+		highscores: HashMap::new(),
 		color0: RED,
 		color1: Color { r: 0.0, g: 1.0, b: 1.0, a: 1.0 },
 	};

@@ -280,7 +280,7 @@ impl Board {
 			e.2 as f32 / self.size as f32 + 2.0*m, 
 			e.3 as f32 / self.size as f32 + 2.0*m, 
 			b, 
-			RED
+			Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }
 		);
 	}
 

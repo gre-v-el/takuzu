@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use egui_macroquad::macroquad::{text::Font, texture::Texture2D, prelude::Color};
 
 pub mod board;
@@ -16,7 +18,22 @@ pub struct Assets {
 }
 
 pub struct Persistance {
-	pub highscores: Vec<(usize, f32)>, // map size, time
+	pub highscores: HashMap<usize, f32>, // map size, time
 	pub color0: Color,
 	pub color1: Color,
+}
+
+impl Persistance {
+	pub fn insert_highscore(&mut self, size: usize, time: f32) -> bool {
+		let mut r = false;
+
+		if let Some(prev) = self.highscores.get(&size) {
+			if time < *prev {
+				r = true;
+				self.highscores.insert(size, time);
+			}
+		}
+
+		r
+	}
 }

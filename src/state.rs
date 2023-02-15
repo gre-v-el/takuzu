@@ -28,10 +28,10 @@ impl State {
 				clear_background(BLACK);
 
 				if button(&Rect{x: 0.3, y: 0.2, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) {
-					ret = Some(State::Sandbox(Board::new(8), None));
+					ret = Some(State::Sandbox(Board::new(4), None));
 				}
 				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) {
-					let mut board = Board::new(8);
+					let mut board = Board::new(4);
 					board.generate_valid();
 					board.degenerate();
 					board.purge_redundancies();
@@ -39,7 +39,7 @@ impl State {
 					ret = Some(State::Learn(board));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) {
-					let mut board = Board::new(8);
+					let mut board = Board::new(4);
 					board.generate_valid();
 					board.purge_redundancies();
 					board.lock_tiles();
@@ -240,7 +240,12 @@ impl State {
 						});
 				}
 
-				let passed = get_time() as f32 - *start_time;
+				if board.is_won && finished_time.is_none() {
+					let time = get_time() as f32 - *start_time;
+					*finished_time = Some(time);
+					let is_highscore = assets.persistance.insert_highscore(board.size, time);
+				}
+				let passed = if let Some(t) = *finished_time {t} else {get_time() as f32 - *start_time};
 				let mut str = format!("0{:.2}s", passed);
 				if passed >= 10.0 {str = str[1..].to_owned();}
 				
