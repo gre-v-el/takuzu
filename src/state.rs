@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text}, Assets};
+use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color}, Assets};
 use egui_macroquad::macroquad::prelude::*;
 
 #[derive(Clone)]
@@ -289,8 +289,8 @@ impl State {
 				}
 			}
 			Self::EndScreen(inner_state, highscore) => {
-				
-				inner_state.update(assets, false);
+				// TODO
+				// inner_state.update(assets, false); 
 				
 				let allocated_rect = Rect {x: 0.0, y: 0.0, w: 1.0, h: 1.0};
 				let display_rect = rect_circumscribed_on_rect(allocated_rect, screen_width()/screen_height());
@@ -303,10 +303,32 @@ impl State {
 				let m = 0.01;
 				draw_round_rect(0.2-m, 0.1-m, 0.6+2.0*m, 0.8+2.0*m, 0.05+m, BLACK);
 				draw_round_rect(0.2, 0.1, 0.6, 0.8, 0.05, DARKGRAY);
+				
+				draw_centered_text(allocated_rect.center() - vec2(0.0, 0.3), "Finished!", font, 0.1);
 
-				draw_centered_text(allocated_rect.center() - vec2(0.0, 0.1), "Finished!", font, 0.1);
+				match highscore {
+					None => {
+						match &**inner_state {
+							State::Learn(_) => {
+								draw_centered_text_color(allocated_rect.center(), "(No scores in Learn mode)", font, 0.03, GRAY);
+							}
+							State::Serious(_, _, time) => {
+								draw_centered_text_color(allocated_rect.center(), format!("time: {:.2}s", time.unwrap()).as_str(), font, 0.08, WHITE);
+							}
+							_ => {}
+						}
+					}
+					Some((new, previous)) => {
+						draw_centered_text_color(allocated_rect.center() - vec2(0.0, 0.2), "High Score!", font, 0.09, ORANGE);
+						draw_centered_text_color(allocated_rect.center() - vec2(0.0, 0.07), format!("{:.2}s", new).as_str(), font, 0.08, ORANGE);
+						if let Some(previous) = previous {
+							draw_centered_text_color(allocated_rect.center() + vec2(0.0, 0.0), format!("{:.2}s", previous).as_str(), font, 0.05, WHITE);
+						}
 
-				if button(&Rect { x: 0.25, y: 0.55, w: 0.2, h: 0.1 }, GRAY, "Play Again", &cam, font, 0.07) {
+					}
+				}
+
+				if button(&Rect { x: 0.25, y: 0.6, w: 0.5, h: 0.1 }, GRAY, "Play Again", &cam, font, 0.07) {
 					match &**inner_state {
 						State::Serious(b, _, _) => {
 							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32, None));
@@ -320,7 +342,7 @@ impl State {
 						}
 					}
 				}
-				if button(&Rect { x: 0.55, y: 0.55, w: 0.2, h: 0.1 }, GRAY, "Back", &cam, font, 0.07) {
+				if button(&Rect { x: 0.25, y: 0.75, w: 0.5, h: 0.1 }, GRAY, "Back", &cam, font, 0.07) {
 					ret = Some(State::MainMenu);
 				}
 			}

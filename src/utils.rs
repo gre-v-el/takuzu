@@ -68,6 +68,19 @@ pub fn draw_centered_text(center: Vec2, text: &str, font: Font, scale: f32) {
    });
 }
 
+pub fn draw_centered_text_color(center: Vec2, text: &str, font: Font, scale: f32, col: Color) {
+	let dims = measure_text(text, Some(font), 128, 1.0/128.0 * scale);
+
+	draw_text_ex(text, center.x - dims.width/2.0, center.y + dims.height/2.0, TextParams { 
+	   font: font, 
+	   font_size: 128,
+	   font_scale: 1.0/128.0 * scale, 
+	   font_scale_aspect: 1.0, 
+	   rotation: 0.0, 
+	   color: col
+   });
+}
+
 pub fn draw_centered_text_stable(center: Vec2, text: &str, format: &str, font: Font, scale: f32) {
 	let dims = measure_text(format, Some(font), 128, 1.0/128.0 * scale);
 
