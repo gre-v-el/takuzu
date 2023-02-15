@@ -1,20 +1,20 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text, draw_centered_text_stable}, Assets};
+use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable}, Assets};
 use egui_macroquad::macroquad::prelude::*;
 
 pub enum State {
 	MainMenu,
 	Sandbox(Board, Option<u32>),
 	Learn(Board),
-	Serious(Board, f32), // start time
+	Serious(Board, f32, Option<f32>), // start time, finished time
 	// Settings,
 	// Highscores,
 	// DifficultyChoice, 
 }
 
 impl State {
-	pub fn update(&mut self, assets: &Assets) -> Option<State> {
+	pub fn update(&mut self, assets: &mut Assets) -> Option<State> {
 		let font = assets.font;
 		let mut ret = None;
 		match self {
@@ -43,7 +43,7 @@ impl State {
 					board.generate_valid();
 					board.purge_redundancies();
 					board.lock_tiles();
-					ret = Some(State::Serious(board, get_time() as f32));
+					ret = Some(State::Serious(board, get_time() as f32, None));
 				}
 			}
 			Self::Sandbox(board, tries) => {
@@ -215,7 +215,7 @@ impl State {
 				}
 
 			}
-			Self::Serious(board, start_time) => {
+			Self::Serious(board, start_time, finished_time) => {
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
@@ -241,14 +241,12 @@ impl State {
 				}
 
 				let passed = get_time() as f32 - *start_time;
-				let str = format!("{:.4}s", passed/100.0);
-				let mut str = String::from(&str[2..]);
-				str.insert(2, '.');
+				let mut str = format!("0{:.2}s", passed);
+				if passed >= 10.0 {str = str[1..].to_owned();}
 				
 				for (i, c) in str.chars().enumerate() {
-					draw_centered_text_stable(vec2(i as f32 * 0.07 + 0.3, -0.1), [c].iter().collect::<String>().as_str(), "0", font, 0.1);
+					draw_centered_text_stable(vec2(i as f32 * 0.07 + 0.04, -0.1), [c].iter().collect::<String>().as_str(), "0", font, 0.1);
 				}
-				// draw_centered_text_stable(vec2(0.5, -0.1), str.as_str(), "00.00", font, 0.1);
 
 				
 				board.handle_mouse(&camera);
