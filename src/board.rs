@@ -92,6 +92,18 @@ impl Board {
 		}
 	}
 
+	pub fn lock_tiles(&mut self) {
+		for y in 0..self.size {
+			for x in 0..self.size {
+				self.map[y][x] = match self.map[y][x] {
+					CellState::False(false) => CellState::False(true),
+					CellState::True(false) => CellState::True(true),
+					rest => rest
+				}
+			}
+		}
+	}
+
 	pub fn verify_board(&mut self) {
 		let mut resp1 = self.get_errors_axis(|v, x, y| v[y][x]);
 		let resp2 = self.get_errors_axis(|v, y, x| v[y][x]);
@@ -132,8 +144,8 @@ impl Board {
 			for c2 in 0..self.size {
 
 				match get(&self.map, c1, c2) {
-					CellState::False => falses += 1,
-					CellState::True => trues += 1,
+					CellState::False(_) => falses += 1,
+					CellState::True(_) => trues += 1,
 					CellState::None => nones += 1,
 				};
 
@@ -377,8 +389,8 @@ impl Board {
 
 			for c2 in 0..self.size {
 				match get(&self.map, c1, c2) {
-					CellState::False => falses += 1,
-					CellState::True => trues += 1,
+					CellState::False(_) => falses += 1,
+					CellState::True(_) => trues += 1,
 					CellState::None => nones += 1,
 				}
 			}
@@ -386,7 +398,7 @@ impl Board {
 			if trues == self.size/2 && nones != 0 {
 				for c2 in 0..self.size {
 					if get(&self.map, c1, c2) == CellState::None {
-						set(&mut self.map, c1, c2, CellState::False);
+						set(&mut self.map, c1, c2, CellState::False(false));
 					}
 				}
 				changed = true;
@@ -394,7 +406,7 @@ impl Board {
 			if falses == self.size/2 && nones != 0 {
 				for c2 in 0..self.size {
 					if get(&self.map, c1, c2) == CellState::None {
-						set(&mut self.map, c1, c2, CellState::True);
+						set(&mut self.map, c1, c2, CellState::True(false));
 					}
 				}
 				changed = true;
@@ -512,8 +524,8 @@ impl Board {
 
 			for c2 in 0..self.size {
 				match get(&self.map, c1, c2) {
-					CellState::False => falses += 1,
-					CellState::True => trues += 1,
+					CellState::False(_) => falses += 1,
+					CellState::True(_) => trues += 1,
 					CellState::None => {},
 				}
 			}

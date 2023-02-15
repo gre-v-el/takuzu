@@ -33,12 +33,14 @@ impl State {
 					board.generate_valid();
 					board.degenerate();
 					board.purge_redundancies();
+					board.lock_tiles();
 					ret = Some(State::Learn(board));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) {
 					let mut board = Board::new(8);
 					board.generate_valid();
-					// board.purge_redundancies();
+					board.purge_redundancies();
+					board.lock_tiles();
 					ret = Some(State::Serious(board));
 				}
 			}
