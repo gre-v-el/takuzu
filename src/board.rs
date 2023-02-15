@@ -85,7 +85,28 @@ impl Board {
 	pub fn generate_hint(&mut self) {
 		let mut vec = Vec::new();
 		let mut clone = self.clone();
-		if clone.surround_doubles() || clone.separate_triples() || clone.fill_rows() {
+		
+		if 
+		clone.surround_doubles_axis(
+			|v, y, x| v[y][x], 
+			|v, y, x, s| v[y][x] = s) ||
+		clone.surround_doubles_axis(
+			|v, x, y| v[y][x], 
+			|v, x, y, s| v[y][x] = s) ||
+		clone.separate_triples_axis(
+			|v, y, x| v[y][x], 
+			|v, y, x, s| v[y][x] = s) ||
+		clone.separate_triples_axis(
+			|v, x, y| v[y][x], 
+			|v, x, y, s| v[y][x] = s) ||
+		clone.fill_rows_axis(
+			|v, y, x| v[y][x], 
+			|v, y, x, s| v[y][x] = s) ||
+		clone.fill_rows_axis(
+			|v, x, y| v[y][x], 
+			|v, x, y, s| v[y][x] = s)
+		
+		{
 			for y in 0..self.size {
 				for x in 0..self.size {
 					if self.map[y][x] == CellState::None && clone.map[y][x] != CellState::None {
@@ -94,6 +115,9 @@ impl Board {
 				}
 			}
 		}
+
+		// let _ = self.surround_doubles() || self.separate_triples() || self.fill_rows();
+		
 
 		if vec.len() != 0 {
 			use rand::ChooseRandom;
@@ -392,17 +416,17 @@ impl Board {
 	
 
 	pub fn fill_rows(&mut self) -> bool {
-		let r = self.fill_row_axis(
+		let r = self.fill_rows_axis(
 			|v, y, x| v[y][x], 
 			|v, y, x, s| v[y][x] = s) |
-		self.fill_row_axis(
+		self.fill_rows_axis(
 			|v, x, y| v[y][x], 
 			|v, x, y, s| v[y][x] = s);
 
 		r
 	}
 
-	pub fn fill_row_axis<
+	pub fn fill_rows_axis<
 		F: Fn(&Vec<Vec<CellState>>, usize, usize) -> CellState,
 		G: Fn(&mut Vec<Vec<CellState>>, usize, usize, CellState) -> ()
 	>(&mut self, get: F, set: G) -> bool {

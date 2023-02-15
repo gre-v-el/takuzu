@@ -19,27 +19,24 @@ impl CellState {
 	pub fn next(&self) -> Self {
 		match self {
 			CellState::None => CellState::False(false),
-			CellState::False(false) => CellState::True(false),
-			CellState::True(false) => CellState::None,
-			rest => *rest
+			CellState::False(_) => CellState::True(false),
+			CellState::True(_) => CellState::None,
 		}
 	}
 
 	pub fn prev(&self) -> Self {
 		match self {
 			CellState::None => CellState::True(false),
-			CellState::False(false) => CellState::None,
-			CellState::True(false) => CellState::False(false),
-			rest => *rest
+			CellState::False(_) => CellState::None,
+			CellState::True(_) => CellState::False(false),
 		}
 	}
 
 	pub fn inverse(&self) -> Self {
 		match self {
 			CellState::None => CellState::None,
-			CellState::False(false) => CellState::True(false),
-			CellState::True(false) => CellState::False(false),
-			rest => *rest
+			CellState::False(_) => CellState::True(false),
+			CellState::True(_) => CellState::False(false),
 		}
 	}
 

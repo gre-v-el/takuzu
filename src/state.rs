@@ -214,7 +214,6 @@ impl State {
 					board.generate_hint();
 				}
 
-
 			}
 			Self::Serious(board, start_time) => {
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
