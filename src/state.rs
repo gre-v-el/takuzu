@@ -1,14 +1,16 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, utils::{rect_circumscribed_on_rect, button}, Assets};
+use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text}, Assets};
 use egui_macroquad::macroquad::prelude::*;
 
 pub enum State {
 	MainMenu,
 	Sandbox(Board, Option<u32>),
 	Learn(Board),
-	Serious(Board),
+	Serious(Board, f32), // start time
 	// Settings,
+	// Highscores,
+	// DifficultyChoice, 
 }
 
 impl State {
@@ -41,7 +43,7 @@ impl State {
 					board.generate_valid();
 					board.purge_redundancies();
 					board.lock_tiles();
-					ret = Some(State::Serious(board));
+					ret = Some(State::Serious(board, get_time() as f32));
 				}
 			}
 			Self::Sandbox(board, tries) => {
@@ -214,7 +216,7 @@ impl State {
 
 
 			}
-			Self::Serious(board) => {
+			Self::Serious(board, start_time) => {
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
@@ -238,6 +240,9 @@ impl State {
 							..Default::default()
 						});
 				}
+
+				let passed = get_time() as f32 - *start_time;
+				draw_centered_text(vec2(0.5, -0.1), format!("{:.2}s", passed).as_str(), font, 0.1);
 
 				
 				board.handle_mouse(&camera);

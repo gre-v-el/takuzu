@@ -50,16 +50,31 @@ pub fn button(rect: &Rect, mut col: Color, text: &str, camera: &Camera2D, font: 
 	}
 	draw_round_rect(rect.x, rect.y, rect.w, rect.h, 0.01, col);
 
-	let dims = measure_text(text, Some(font), 128, 1.0/128.0 * scale);
+	// let dims = measure_text(text, Some(font), 128, 1.0/128.0 * scale);
 
- 	draw_text_ex(text, rect.center().x - dims.width/2.0, rect.center().y + dims.height/2.0, TextParams { 
-		font: font, 
-		font_size: 128, 
-		font_scale: 1.0/128.0 * scale, 
-		font_scale_aspect: 1.0, 
-		rotation: 0.0, 
-		color: WHITE 
-	});
+ 	// draw_text_ex(text, rect.center().x - dims.width/2.0, rect.center().y + dims.height/2.0, TextParams { 
+	// 	font: font, 
+	// 	font_size: 128, 
+	// 	font_scale: 1.0/128.0 * scale, 
+	// 	font_scale_aspect: 1.0, 
+	// 	rotation: 0.0, 
+	// 	color: WHITE 
+	// });
+
+	draw_centered_text(rect.center(), text, font, scale);
 
 	return is_mouse_button_pressed(MouseButton::Left) && rect.contains(mouse);
+}
+
+pub fn draw_centered_text(center: Vec2, text: &str, font: Font, scale: f32) {
+	let dims = measure_text(text, Some(font), 128, 1.0/128.0 * scale);
+
+	draw_text_ex(text, center.x - dims.width/2.0, center.y + dims.height/2.0, TextParams { 
+	   font: font, 
+	   font_size: 128, 
+	   font_scale: 1.0/128.0 * scale, 
+	   font_scale_aspect: 1.0, 
+	   rotation: 0.0, 
+	   color: WHITE 
+   });
 }
