@@ -43,8 +43,8 @@ impl CellState {
 	pub fn col(&self) -> Color {
 		match self {
 			CellState::None => GRAY,
-			CellState::False(_) => BLUE,
-			CellState::True(_) => YELLOW,
+			CellState::False(_) => RED,
+			CellState::True(_) => Color { r: 0.0, g: 1.0, b: 1.0, a: 1.0 },
 		}
 	}
 

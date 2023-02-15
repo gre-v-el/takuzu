@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text}, Assets};
+use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text, draw_centered_text_stable}, Assets};
 use egui_macroquad::macroquad::prelude::*;
 
 pub enum State {
@@ -241,7 +241,14 @@ impl State {
 				}
 
 				let passed = get_time() as f32 - *start_time;
-				draw_centered_text(vec2(0.5, -0.1), format!("{:.2}s", passed).as_str(), font, 0.1);
+				let str = format!("{:.4}s", passed/100.0);
+				let mut str = String::from(&str[2..]);
+				str.insert(2, '.');
+				
+				for (i, c) in str.chars().enumerate() {
+					draw_centered_text_stable(vec2(i as f32 * 0.07 + 0.3, -0.1), [c].iter().collect::<String>().as_str(), "0", font, 0.1);
+				}
+				// draw_centered_text_stable(vec2(0.5, -0.1), str.as_str(), "00.00", font, 0.1);
 
 				
 				board.handle_mouse(&camera);

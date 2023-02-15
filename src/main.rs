@@ -5,9 +5,8 @@ use takuzu::{state::State, Assets};
 /*
 	TODO:
 		add some nice background (shaders?) and glossy effect for tiles (maybe, test it in shadertoy)
-		let the user know which tiles are locked
 		some high scores?
-		add timing
+		the timer shouldn't twitch
 		come up with a difficulty metric and decide what is better: PURGE vs DEGENERATE + PURGE
 		improve solving with the last rule
 */

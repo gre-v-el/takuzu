@@ -115,12 +115,9 @@ impl Board {
 				}
 			}
 		}
-
-		// let _ = self.surround_doubles() || self.separate_triples() || self.fill_rows();
 		
 
 		if vec.len() != 0 {
-			use rand::ChooseRandom;
 			self.hint = Some(*vec.choose().unwrap());
 		}
 	}
