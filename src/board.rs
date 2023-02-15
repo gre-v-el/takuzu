@@ -86,27 +86,27 @@ impl Board {
 		let mut vec = Vec::new();
 		let mut clone = self.clone();
 		
-		if 
-		clone.surround_doubles_axis(
-			|v, y, x| v[y][x], 
-			|v, y, x, s| v[y][x] = s) ||
-		clone.surround_doubles_axis(
-			|v, x, y| v[y][x], 
-			|v, x, y, s| v[y][x] = s) ||
-		clone.separate_triples_axis(
-			|v, y, x| v[y][x], 
-			|v, y, x, s| v[y][x] = s) ||
-		clone.separate_triples_axis(
-			|v, x, y| v[y][x], 
-			|v, x, y, s| v[y][x] = s) ||
-		clone.fill_rows_axis(
-			|v, y, x| v[y][x], 
-			|v, y, x, s| v[y][x] = s) ||
-		clone.fill_rows_axis(
-			|v, x, y| v[y][x], 
-			|v, x, y, s| v[y][x] = s)
-		
-		{
+		let mut actions: Vec<Box<dyn Fn(&mut Board) -> bool>> = vec![
+			Box::new(|board| {board.surround_doubles_axis(|v, y, x| v[y][x], |v, y, x, s| v[y][x] = s)}),
+			Box::new(|board| {board.surround_doubles_axis(|v, x, y| v[y][x], |v, x, y, s| v[y][x] = s)}),
+			Box::new(|board| {board.separate_triples_axis(|v, y, x| v[y][x], |v, y, x, s| v[y][x] = s)}),
+			Box::new(|board| {board.separate_triples_axis(|v, x, y| v[y][x], |v, x, y, s| v[y][x] = s)}),
+			Box::new(|board| {board.fill_rows_axis(		  |v, y, x| v[y][x], |v, y, x, s| v[y][x] = s)}),
+			Box::new(|board| {board.fill_rows_axis(		  |v, x, y| v[y][x], |v, x, y, s| v[y][x] = s)})
+		];
+
+		use rand::ChooseRandom;
+		actions.shuffle();
+
+		let mut completed = false;
+		for action in actions.iter() {
+			if action(&mut clone) {
+				completed = true;
+				break;
+			}
+		}
+
+		if completed {
 			for y in 0..self.size {
 				for x in 0..self.size {
 					if self.map[y][x] == CellState::None && clone.map[y][x] != CellState::None {
