@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color}, Assets};
-use egui_macroquad::macroquad::prelude::*;
+use macroquad::prelude::*;
 
 #[derive(Clone)]
 pub enum State {
@@ -289,7 +289,7 @@ impl State {
 				}
 			}
 			Self::EndScreen(inner_state, highscore) => {
-				// TODO
+				// When uncommented, breaks the font
 				// inner_state.update(assets, false); 
 				
 				let allocated_rect = Rect {x: 0.0, y: 0.0, w: 1.0, h: 1.0};

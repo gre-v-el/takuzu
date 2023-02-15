@@ -1,5 +1,5 @@
 use std::{time::{SystemTime, UNIX_EPOCH}, collections::HashMap};
-use egui_macroquad::macroquad::{self, prelude::*};
+use macroquad::{self, prelude::*};
 use takuzu::{state::State, Assets, Persistance};
 
 /*

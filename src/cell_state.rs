@@ -1,4 +1,4 @@
-use egui_macroquad::macroquad::prelude::*;
+use macroquad::prelude::*;
 
 #[derive(Copy, Clone, Debug)]
 pub enum CellState {

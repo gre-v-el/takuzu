@@ -1,4 +1,4 @@
-use egui_macroquad::macroquad::prelude::*;
+use macroquad::prelude::*;
 
 pub fn rect_circumscribed_on_rect(rect: Rect, aspect: f32) -> Rect {
 	let rect_aspect = rect.w / rect.h;

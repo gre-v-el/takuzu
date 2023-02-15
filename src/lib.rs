@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use egui_macroquad::macroquad::{text::Font, texture::Texture2D, prelude::Color};
+use macroquad::{text::Font, texture::Texture2D, prelude::Color};
 
 pub mod board;
 pub mod cell_state;

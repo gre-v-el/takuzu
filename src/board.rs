@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use egui_macroquad::macroquad::prelude::*;
+use macroquad::prelude::*;
 use crate::{cell_state::CellState, utils::draw_round_rect};
 
 #[derive(Clone)]
@@ -675,7 +675,7 @@ impl Board {
 			return false;
 		}
 
-		use egui_macroquad::macroquad::rand::ChooseRandom;
+		use macroquad::rand::ChooseRandom;
 		let coords = to_delete.choose().unwrap();
 
 		self.map[coords.1][coords.0] = CellState::None;
