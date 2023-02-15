@@ -9,6 +9,7 @@ pub enum State {
 	Sandbox(Board, Option<u32>),
 	Learn(Board),
 	Serious(Board, f32, Option<f32>), // start time, finished time
+	EndScreen(Box<State>, Option<(f32, Option<f32>)>), // is highscore - new time, previous time (if any)
 	ExitConfirmation(Box<State>),
 	// Settings,
 	// Highscores,
@@ -33,19 +34,10 @@ impl State {
 					ret = Some(State::Sandbox(Board::new(4), None));
 				}
 				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(4);
-					board.generate_valid();
-					board.degenerate();
-					board.purge_redundancies();
-					board.lock_tiles();
-					ret = Some(State::Learn(board));
+					ret = Some(State::Learn(Board::new_learn(4)));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(4);
-					board.generate_valid();
-					board.purge_redundancies();
-					board.lock_tiles();
-					ret = Some(State::Serious(board, get_time() as f32, None));
+					ret = Some(State::Serious(Board::new_serious(4), get_time() as f32, None));
 				}
 			}
 			Self::Sandbox(board, tries) => {
@@ -210,13 +202,18 @@ impl State {
 				board.draw_hint();
 				board.draw();
 
+
 				if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Hint", &camera, font, 0.06) && handle_mouse {
 					board.generate_hint();
 				}
 				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) && handle_mouse {
-					ret = Some(State::ExitConfirmation(Box::new(self.clone())));
+					ret = Some(State::ExitConfirmation(Box::new(State::Learn(board.clone()))));
 				}
 
+				
+				if board.is_won {
+					ret = Some(State::EndScreen(Box::new(State::Learn(board.clone())), None));
+				}
 			}
 			Self::Serious(board, start_time, finished_time) => {
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
@@ -246,7 +243,8 @@ impl State {
 				if board.is_won && finished_time.is_none() {
 					let time = get_time() as f32 - *start_time;
 					*finished_time = Some(time);
-					let is_highscore = assets.persistance.insert_highscore(board.size, time);
+					let (is_highscore, prev_time) = assets.persistance.insert_highscore(board.size, time);
+					ret = Some(State::EndScreen(Box::new(State::Serious(board.clone(), *start_time, Some(time))), if is_highscore {Some((time, prev_time))} else {None}));
 				}
 				let passed = if let Some(t) = *finished_time {t} else {get_time() as f32 - *start_time};
 				let mut str = format!("0{:.2}s", passed);
@@ -288,6 +286,42 @@ impl State {
 				}
 				if button(&Rect { x: 0.55, y: 0.55, w: 0.2, h: 0.1 }, GRAY, "No", &cam, font, 0.07) {
 					ret = Some((**inner_state).clone());
+				}
+			}
+			Self::EndScreen(inner_state, highscore) => {
+				
+				inner_state.update(assets, false);
+				
+				let allocated_rect = Rect {x: 0.0, y: 0.0, w: 1.0, h: 1.0};
+				let display_rect = rect_circumscribed_on_rect(allocated_rect, screen_width()/screen_height());
+
+				let cam = Camera2D::from_display_rect(display_rect);
+				set_camera(&cam);
+
+				draw_rectangle(display_rect.x, display_rect.y, display_rect.w, display_rect.h, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.8 });
+
+				let m = 0.01;
+				draw_round_rect(0.2-m, 0.1-m, 0.6+2.0*m, 0.8+2.0*m, 0.05+m, BLACK);
+				draw_round_rect(0.2, 0.1, 0.6, 0.8, 0.05, DARKGRAY);
+
+				draw_centered_text(allocated_rect.center() - vec2(0.0, 0.1), "Finished!", font, 0.1);
+
+				if button(&Rect { x: 0.25, y: 0.55, w: 0.2, h: 0.1 }, GRAY, "Play Again", &cam, font, 0.07) {
+					match &**inner_state {
+						State::Serious(b, _, _) => {
+							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32, None));
+						}
+						State::Learn(b) => {
+							let board = Board::new_learn(b.size);
+							ret = Some(State::Learn(board));
+						}
+						_ => {
+							ret = Some(State::Learn(Board::new_learn(6)));
+						}
+					}
+				}
+				if button(&Rect { x: 0.55, y: 0.55, w: 0.2, h: 0.1 }, GRAY, "Back", &cam, font, 0.07) {
+					ret = Some(State::MainMenu);
 				}
 			}
 		}

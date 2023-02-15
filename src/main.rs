@@ -11,7 +11,12 @@ use takuzu::{state::State, Assets, Persistance};
 		improve solving with the last rule
 		change colors
 
-		Learn/Serious endscreen
+		end screen highscore
+		learn -> endscreen destroys the font (?)
+
+		show error when there are too many tiles of single type even when there are still some nones 
+
+		figure out what's wrong with font degradation
 */
 
 fn window_config() -> Conf {

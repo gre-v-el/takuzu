@@ -29,6 +29,23 @@ impl Board {
 		s
 	}
 
+	pub fn new_learn(size: usize) -> Self {
+		let mut board = Board::new(size);
+		board.generate_valid();
+		board.degenerate();
+		board.purge_redundancies();
+		board.lock_tiles();
+		board
+	}
+
+	pub fn new_serious(size: usize) -> Self {
+		let mut board = Board::new(size);
+		board.generate_valid();
+		board.purge_redundancies();
+		board.lock_tiles();
+		board
+	}
+
 	pub fn handle_mouse(&mut self, camera: &Camera2D) {
 		if !is_mouse_button_pressed(MouseButton::Left) && !is_mouse_button_pressed(MouseButton::Right) {
 			return;

@@ -10,13 +10,14 @@ pub mod utils;
 pub const FONT: &[u8] = include_bytes!("../assets/Jellee-Bold.ttf");
 pub const GRADIENT: &[u8] = include_bytes!("../assets/gradient.png");
 
-
+#[derive(Clone)]
 pub struct Assets {
 	pub font: Font,
 	pub gradient: Texture2D,
 	pub persistance: Persistance,
 }
 
+#[derive(Clone)]
 pub struct Persistance {
 	pub highscores: HashMap<usize, f32>, // map size, time
 	pub color0: Color,
@@ -24,16 +25,17 @@ pub struct Persistance {
 }
 
 impl Persistance {
-	pub fn insert_highscore(&mut self, size: usize, time: f32) -> bool {
-		let mut r = false;
-
+	// bool - is highscore, option - previous highscore
+	pub fn insert_highscore(&mut self, size: usize, time: f32) -> (bool, Option<f32>) {
 		if let Some(prev) = self.highscores.get(&size) {
 			if time < *prev {
-				r = true;
-				self.highscores.insert(size, time);
+				return (true, self.highscores.insert(size, time));
 			}
+			return (false, None);
 		}
-
-		r
+		else {
+			self.highscores.insert(size, time);
+			return (true, None);
+		}
 	}
 }
