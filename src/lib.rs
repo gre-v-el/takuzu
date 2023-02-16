@@ -24,6 +24,7 @@ pub struct Persistance {
 	pub color0: [f32; 4],
 	pub color1: [f32; 4],
 	pub color2: [f32; 4],
+	pub game_size: usize,
 }
 
 impl Persistance {
@@ -62,6 +63,7 @@ impl Persistance {
 					color0: GRAY.into(),
 					color1: Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into(),
 					color2: Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into(),
+					game_size: 4,
 				}
 			}
 		}

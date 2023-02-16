@@ -4,16 +4,23 @@ use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_cente
 use macroquad::prelude::*;
 
 #[derive(Clone)]
+pub enum NextState {
+	Sandbox,
+	Learn,
+	Serious,
+}
+
+#[derive(Clone)]
 pub enum State {
 	MainMenu,
-	Sandbox(Board, Option<u32>),
+	Sandbox(Board),
 	Learn(Board),
 	Serious(Board, f32, Option<f32>), // start time, finished time
 	EndScreen(Box<State>, Option<(f32, Option<f32>)>), // is highscore - new time, previous time (if any)
 	ExitConfirmation(Box<State>),
 	Highscores,
 	Settings(Board),
-	// DifficultyChoice, 
+	DifficultyChoice(NextState, usize), 
 }
 
 impl State {
@@ -31,13 +38,16 @@ impl State {
 				clear_background(BLACK);
 				
 				if button(&Rect{x: 0.3, y: 0.2, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) && handle_mouse {
-					ret = Some(State::Sandbox(Board::new(4), None));
+					// ret = Some(State::Sandbox(Board::new(4), None));
+					ret = Some(Self::DifficultyChoice(NextState::Sandbox, assets.persistance.game_size));
 				}
 				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) && handle_mouse {
-					ret = Some(State::Learn(Board::new_learn(4)));
+					// ret = Some(State::Learn(Board::new_learn(4)));
+					ret = Some(Self::DifficultyChoice(NextState::Learn, assets.persistance.game_size));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) && handle_mouse {
-					ret = Some(State::Serious(Board::new_serious(4), get_time() as f32 + 1.5, None));
+					// ret = Some(State::Serious(Board::new_serious(4), get_time() as f32 + 1.5, None));
+					ret = Some(Self::DifficultyChoice(NextState::Serious, assets.persistance.game_size));
 				}
 
 				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, GRAY, "HIGHSCORES", &cam, font, 0.05) && handle_mouse {
@@ -63,7 +73,39 @@ impl State {
 					ret = Some(State::Settings(board));
 				}
 			}
-			Self::Sandbox(board, tries) => {
+			Self::DifficultyChoice(next, size) => {
+				
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+				draw_centered_text(vec2(0.5, 0.35), "board size:", font, 0.1);
+
+				let mut val = (*size as f32 - 2.0)/18.0;
+				slider(&mut val, 0.0, 1.0, vec2(0.2, 0.5), 0.6, GRAY, &camera);
+				*size = ((val*18.0 + 2.0)/2.0).round() as usize * 2;
+				
+				draw_centered_text(vec2(0.5, 0.65), format!("{size}").as_str(), font, 0.1);
+
+				if button(&Rect{x: 0.35, y: 0.8, w: 0.3, h: 0.1}, GRAY, "PLAY", &camera, font, 0.08) {
+					assets.persistance.game_size = *size;
+					assets.persistance.save();
+					ret = Some(
+						match next {
+							NextState::Sandbox => State::Sandbox(Board::new(*size)),
+							NextState::Learn => State::Learn(Board::new_learn(*size)),
+							NextState::Serious => State::Serious(Board::new_serious(*size), get_time() as f32 + 1.5, None),
+						}
+					);
+				}
+
+				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Back", &camera, font, 0.06) {
+					ret = Some(State::MainMenu);
+					assets.persistance.game_size = *size;
+					assets.persistance.save();
+				}
+			}
+			Self::Sandbox(board) => {
 				
 				// (0,0) to (1,1) is the board. Depending on the aspect ratio: vertical will have space at the bottom and horizontal will have space to the left for some ui. Also allocate space at the top for exit and timer
 				let allocated_rect = if screen_width() / screen_height() > 1.0 {
@@ -148,7 +190,7 @@ impl State {
 				};
 				
 				if button(&buttons[0], GRAY, "Generate", &camera, font, scale) && handle_mouse {
-					*tries = Some(board.generate_valid());
+					board.generate_valid();
 				}
 				if button(&buttons[1], GRAY, "Purge some", &camera, font, scale) && handle_mouse {
 					board.degenerate();

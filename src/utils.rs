@@ -62,11 +62,8 @@ pub fn slider(val: &mut f32, from: f32, to: f32, left: Vec2, width: f32, col: Co
 	let side_margin = handle_radius;
 	let logical_thickness = 2.0*handle_radius;
 	let mut handle_border = BLACK;
+	
 	if (Rect{x: left.x - side_margin, y: left.y - logical_thickness*0.5, w: width + 2.0*side_margin, h: logical_thickness}.contains(mouse)) {
-		if is_mouse_button_down(MouseButton::Left) {
-			let t = ((mouse.x - left.x)/width).clamp(0.0, 1.0);
-			*val = (to-from)*t + from;
-		}
 		handle_border = DARKGRAY;
 	}
 
@@ -74,6 +71,11 @@ pub fn slider(val: &mut f32, from: f32, to: f32, left: Vec2, width: f32, col: Co
 	draw_round_rect(left.x, left.y-graphical_thickness*0.5, width, graphical_thickness, 0.01, col);
 	draw_circle(left.x + t*width, left.y, handle_radius, handle_border);
 	draw_circle(left.x + t*width, left.y, handle_radius - 0.01, WHITE);
+
+	if (Rect{x: left.x - side_margin, y: left.y - logical_thickness*0.5, w: width + 2.0*side_margin, h: logical_thickness}.contains(mouse)) && is_mouse_button_down(MouseButton::Left) {
+		let t = ((mouse.x - left.x)/width).clamp(0.0, 1.0);
+		*val = (to-from)*t + from;
+	}
 }
 
 pub fn draw_centered_text(center: Vec2, text: &str, font: Font, scale: f32) {
