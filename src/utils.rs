@@ -55,6 +55,27 @@ pub fn button(rect: &Rect, mut col: Color, text: &str, camera: &Camera2D, font: 
 	return is_mouse_button_pressed(MouseButton::Left) && rect.contains(mouse);
 }
 
+pub fn slider(val: &mut f32, from: f32, to: f32, left: Vec2, width: f32, col: Color, camera: &Camera2D) {
+	let mouse = camera.screen_to_world(mouse_position().into());
+	let graphical_thickness = 0.05;
+	let handle_radius = 0.04;
+	let side_margin = handle_radius;
+	let logical_thickness = 2.0*handle_radius;
+	let mut handle_border = BLACK;
+	if (Rect{x: left.x - side_margin, y: left.y - logical_thickness*0.5, w: width + 2.0*side_margin, h: logical_thickness}.contains(mouse)) {
+		if is_mouse_button_down(MouseButton::Left) {
+			let t = ((mouse.x - left.x)/width).clamp(0.0, 1.0);
+			*val = (to-from)*t + from;
+		}
+		handle_border = DARKGRAY;
+	}
+
+	let t = (*val-from)/(to-from);
+	draw_round_rect(left.x, left.y-graphical_thickness*0.5, width, graphical_thickness, 0.01, col);
+	draw_circle(left.x + t*width, left.y, handle_radius, handle_border);
+	draw_circle(left.x + t*width, left.y, handle_radius - 0.01, WHITE);
+}
+
 pub fn draw_centered_text(center: Vec2, text: &str, font: Font, scale: f32) {
 	let dims = measure_text(text, Some(font), 128, 1.0/128.0 * scale);
 

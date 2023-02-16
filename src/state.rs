@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color}, Assets};
+use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, Assets};
 use macroquad::prelude::*;
 
 #[derive(Clone)]
@@ -12,7 +12,7 @@ pub enum State {
 	EndScreen(Box<State>, Option<(f32, Option<f32>)>), // is highscore - new time, previous time (if any)
 	ExitConfirmation(Box<State>),
 	Highscores,
-	// Settings,
+	Settings(Board),
 	// DifficultyChoice, 
 }
 
@@ -40,8 +40,27 @@ impl State {
 					ret = Some(State::Serious(Board::new_serious(4), get_time() as f32 + 1.5, None));
 				}
 
-				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, GRAY, "highscores", &cam, font, 0.06) && handle_mouse {
+				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, GRAY, "HIGHSCORES", &cam, font, 0.05) && handle_mouse {
 					ret = Some(State::Highscores);
+				}
+
+				if button(&Rect{x: 0.3, y: 0.85, w: 0.4, h: 0.1}, GRAY, "SETTINGS", &cam, font, 0.05) && handle_mouse {
+					use crate::cell_state::CellState::*;
+					let board = Board { 
+						is_won: false, 
+						is_valid: true, 
+						size: 4, 
+						map: vec![
+							vec![True(false), True(false), None, None],
+							vec![None, False(false), False(false), False(false)],
+							vec![True(false), None, True(false), None],
+							vec![False(false), False(false), None, True(false)],
+						], 
+						error: [Option::Some((1, 1, 3, 1)), Option::None],
+						hint: Some((2, 3)),
+						show_locked: Option::None
+					}; 
+					ret = Some(State::Settings(board));
 				}
 			}
 			Self::Sandbox(board, tries) => {
@@ -374,7 +393,7 @@ impl State {
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
 
-				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) {
+				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, GRAY, "Back", &camera, font, 0.06) {
 					ret = Some(State::MainMenu);
 				}
 
@@ -387,6 +406,45 @@ impl State {
 						y += 0.1;
 					}
 				}
+			}
+			Self::Settings(board) => {
+
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.7, y: -1.5, w: 2.4, h: 2.6 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+				board.draw_errors();
+				board.draw_hint();
+				board.draw(assets);
+
+
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, GRAY, "Back", &camera, font, 0.06) {
+					ret = Some(State::MainMenu);
+					assets.persistance.save();
+				}
+				if button(&Rect { x: 0.0, y: -0.1, w: 0.2, h: 0.1 }, GRAY, "Reset", &camera, font, 0.06) {
+					assets.persistance.color0 = GRAY.into();
+					assets.persistance.color1 = Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into();
+					assets.persistance.color2 = Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into();
+				}
+
+				slider(&mut assets.persistance.color0[0], 0.0, 1.0, vec2(-0.05, 0.1), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color0[1], 0.0, 1.0, vec2(-0.05, 0.2), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color0[2], 0.0, 1.0, vec2(-0.05, 0.3), 0.3, color_u8!(0, 0, 255, 255), &camera);
+
+				slider(&mut assets.persistance.color1[0], 0.0, 1.0, vec2(0.35, 0.1), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color1[1], 0.0, 1.0, vec2(0.35, 0.2), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color1[2], 0.0, 1.0, vec2(0.35, 0.3), 0.3, color_u8!(0, 0, 255, 255), &camera);
+
+				slider(&mut assets.persistance.color2[0], 0.0, 1.0, vec2(0.75, 0.1), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color2[1], 0.0, 1.0, vec2(0.75, 0.2), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color2[2], 0.0, 1.0, vec2(0.75, 0.3), 0.3, color_u8!(0, 0, 255, 255), &camera);
+
+
 			}
 		}
 		

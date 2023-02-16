@@ -8,9 +8,6 @@ use takuzu::{state::State, Assets, Persistance};
 		let the user choose board size
 		come up with a difficulty metric and decide what is better: PURGE vs DEGENERATE + PURGE
 		improve solving with the last rule
-		change colors (error highlight consumes the red tiles)
-
-		serde persistance
 */
 
 fn window_config() -> Conf {
