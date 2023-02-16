@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use macroquad::prelude::*;
-use crate::{cell_state::CellState, utils::draw_round_rect, Assets};
+use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets};
 
 #[derive(Clone)]
 pub struct Board {

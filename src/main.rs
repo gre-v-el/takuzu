@@ -1,6 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 use macroquad::{self, prelude::*};
-use takuzu::{state::State, Assets, Persistance};
+use takuzu::{state::State, assets::Assets, assets::Persistance};
 
 /*
 	TODO:

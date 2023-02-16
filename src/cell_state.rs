@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use crate::Assets;
+use crate::assets::Assets;
 
 #[derive(Copy, Clone, Debug)]
 pub enum CellState {

@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, utils::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, Assets};
+use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, assets::Assets};
 use macroquad::prelude::*;
 
 #[derive(Clone)]
@@ -38,15 +38,12 @@ impl State {
 				clear_background(BLACK);
 				
 				if button(&Rect{x: 0.3, y: 0.2, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) && handle_mouse {
-					// ret = Some(State::Sandbox(Board::new(4), None));
 					ret = Some(Self::DifficultyChoice(NextState::Sandbox, assets.persistance.game_size));
 				}
 				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) && handle_mouse {
-					// ret = Some(State::Learn(Board::new_learn(4)));
 					ret = Some(Self::DifficultyChoice(NextState::Learn, assets.persistance.game_size));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) && handle_mouse {
-					// ret = Some(State::Serious(Board::new_serious(4), get_time() as f32 + 1.5, None));
 					ret = Some(Self::DifficultyChoice(NextState::Serious, assets.persistance.game_size));
 				}
 
