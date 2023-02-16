@@ -333,8 +333,9 @@ impl State {
 							State::Learn(_) => {
 								draw_centered_text_color(allocated_rect.center(), "(No scores in Learn mode)", font, 0.03, GRAY);
 							}
-							State::Serious(_, _, time) => {
-								draw_centered_text_color(allocated_rect.center(), format!("time: {:.2}s", time.unwrap()).as_str(), font, 0.08, WHITE);
+							State::Serious(board, _, time) => {
+								draw_centered_text_color(allocated_rect.center() - vec2(0.0, 0.1), format!("time: {:.2}s", time.unwrap()).as_str(), font, 0.08, WHITE);
+								draw_centered_text_color(allocated_rect.center(), format!("highscore: {:.2}s", assets.persistance.highscores.get(&board.size).unwrap()).as_str(), font, 0.05, ORANGE);
 							}
 							_ => {}
 						}
