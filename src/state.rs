@@ -11,8 +11,8 @@ pub enum State {
 	Serious(Board, f32, Option<f32>), // start time, finished time
 	EndScreen(Box<State>, Option<(f32, Option<f32>)>), // is highscore - new time, previous time (if any)
 	ExitConfirmation(Box<State>),
+	Highscores,
 	// Settings,
-	// Highscores,
 	// DifficultyChoice, 
 }
 
@@ -38,6 +38,10 @@ impl State {
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) && handle_mouse {
 					ret = Some(State::Serious(Board::new_serious(4), get_time() as f32, None));
+				}
+
+				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, GRAY, "highscores", &cam, font, 0.06) && handle_mouse {
+					ret = Some(State::Highscores);
 				}
 			}
 			Self::Sandbox(board, tries) => {
@@ -346,6 +350,21 @@ impl State {
 				}
 				if button(&Rect { x: 0.25, y: 0.75, w: 0.5, h: 0.1 }, GRAY, "Back", &cam, font, 0.07) {
 					ret = Some(State::MainMenu);
+				}
+			}
+			Self::Highscores => {
+				
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) {
+					ret = Some(State::MainMenu);
+				}
+
+				for (i, (size, time)) in assets.persistance.highscores.iter().enumerate() {
+					let extra_space = if *size >= 20 {""} else if *size >= 10 {" "} else {"   "};
+					draw_centered_text_stable(vec2(0.5, 0.0 + i as f32 *0.1), format!("{extra_space}{}: {:.2}s", size, time).as_str(), "0: 000.00", font, 0.09);
 				}
 			}
 		}

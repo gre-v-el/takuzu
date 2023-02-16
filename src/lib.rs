@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use macroquad::{text::Font, texture::Texture2D, prelude::Color};
 
@@ -19,7 +19,7 @@ pub struct Assets {
 
 #[derive(Clone)]
 pub struct Persistance {
-	pub highscores: HashMap<usize, f32>, // map size, time
+	pub highscores: BTreeMap<usize, f32>, // map size, time
 	pub color0: Color,
 	pub color1: Color,
 }

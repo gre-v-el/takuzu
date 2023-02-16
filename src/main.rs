@@ -1,22 +1,20 @@
-use std::{time::{SystemTime, UNIX_EPOCH}, collections::HashMap};
+use std::{time::{SystemTime, UNIX_EPOCH}, collections::{HashMap, BTreeMap}};
 use macroquad::{self, prelude::*};
 use takuzu::{state::State, Assets, Persistance};
 
 /*
 	TODO:
 		add some nice background (shaders?) and glossy effect for tiles (maybe, test it in shadertoy)
-		some high scores?
 		let the user choose board size
 		come up with a difficulty metric and decide what is better: PURGE vs DEGENERATE + PURGE
 		improve solving with the last rule
-		change colors
+		change colors (error highlight consumes the red tiles)
 
-		end screen highscore
-		learn -> endscreen destroys the font (?)
+		get cell colors from persistance
 
-		show error when there are too many tiles of single type even when there are still some nones 
+		when spawning serious, set the start time to 3 seconds into the future. while drawing check the time and do a countdown (let the user click the screen to start now)
 
-		figure out what's wrong with font degradation
+		serde persistance
 */
 
 fn window_config() -> Conf {
@@ -35,7 +33,7 @@ async fn main() {
 
 	let mut state = State::MainMenu;
 	let persistance = Persistance {
-		highscores: HashMap::new(),
+		highscores: BTreeMap::from([(2, 5.0), (4, 11.0), (6, 40.0), (8, 100.0), (10, 200.0), (12, 400.0), (14, 700.0), (16, 1000.0), (18, 1500.0), (20, 2500.0)]),
 		color0: RED,
 		color1: Color { r: 0.0, g: 1.0, b: 1.0, a: 1.0 },
 	};

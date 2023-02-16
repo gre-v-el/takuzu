@@ -184,7 +184,6 @@ impl Board {
 		for c1 in 0..self.size {
 			let mut trues = 0;
 			let mut falses = 0;
-			let mut nones = 0;
 
 			let mut counter = 1;
 			let mut state = CellState::None;
@@ -193,7 +192,7 @@ impl Board {
 				match get(&self.map, c1, c2) {
 					CellState::False(_) => falses += 1,
 					CellState::True(_) => trues += 1,
-					CellState::None => nones += 1,
+					CellState::None => {},
 				};
 
 				if get(&self.map, c1, c2) == state {
@@ -209,7 +208,7 @@ impl Board {
 				}
 			}
 
-			if nones == 0 && falses != trues {
+			if falses > self.size/2 || trues > self.size/2 {
 				return [Some((0, c1, self.size, 1)), None];
 			}
 		}
