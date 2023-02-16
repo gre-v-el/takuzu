@@ -6,6 +6,8 @@ use takuzu::{state::State, assets::Assets, assets::Persistance};
 	TODO:
 		add some nice background (shaders?) and glossy effect for tiles (maybe, test it in shadertoy)
 		improve solving with the last rule
+
+		add generating board screen (when the generation lasts more than 3 seconds, add confirmation (if it's serious))
 */
 
 fn window_config() -> Conf {
@@ -23,12 +25,7 @@ async fn main() {
 	rand::srand(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() as u64);
 
 	let mut state = State::MainMenu;
-	let persistance = Persistance::load();
-	let mut assets = Assets {
-		font: load_ttf_font_from_bytes(takuzu::FONT).unwrap(),
-		gradient: Texture2D::from_file_with_format(takuzu::GRADIENT, None),
-		persistance,
-	};
+	let mut assets = Assets::get();
 
     loop {
 		if let Some(s) = state.update(&mut assets, true) {

@@ -1,6 +1,6 @@
 use std::{fs::File, io::{Read, Write}};
 
-use macroquad::{text::Font, texture::Texture2D, prelude::{GRAY, Color}};
+use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{GRAY, Color}};
 use nanoserde::{DeBin, SerBin};
 
 
@@ -9,6 +9,16 @@ pub struct Assets {
 	pub font: Font,
 	pub gradient: Texture2D,
 	pub persistance: Persistance,
+}
+
+impl Assets {
+	pub fn get() -> Self {
+		Assets {
+			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
+			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
+			persistance: Persistance::load()
+		}
+	}
 }
 
 #[derive(Clone, SerBin, DeBin)]

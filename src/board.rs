@@ -320,6 +320,14 @@ impl Board {
 		self.verify_board();
 	}
 
+	pub fn generate_fraction(&mut self, fract: f32) {
+		while (self.count_nones() as f32 / (self.size * self.size) as f32) > fract {
+			while self.fill_rows() | self.surround_doubles() | self.separate_triples() {}
+			self.insert_random();
+		}
+		self.verify_board();
+	}
+
 	pub fn reset(&mut self) {
 		self.map = vec![vec![CellState::None; self.size]; self.size];
 		self.verify_board();

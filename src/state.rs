@@ -20,7 +20,7 @@ pub enum State {
 	ExitConfirmation(Box<State>),
 	Highscores,
 	Settings(Board),
-	DifficultyChoice(NextState, usize), 
+	DifficultyChoice(Board, NextState, usize), 
 }
 
 impl State {
@@ -38,13 +38,19 @@ impl State {
 				clear_background(BLACK);
 				
 				if button(&Rect{x: 0.3, y: 0.2, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) && handle_mouse {
-					ret = Some(Self::DifficultyChoice(NextState::Sandbox, assets.persistance.game_size));
+					let mut board = Board::new(assets.persistance.game_size);
+					board.generate_fraction(0.6);
+					ret = Some(Self::DifficultyChoice(board, NextState::Sandbox, assets.persistance.game_size));
 				}
 				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) && handle_mouse {
-					ret = Some(Self::DifficultyChoice(NextState::Learn, assets.persistance.game_size));
+					let mut board = Board::new(assets.persistance.game_size);
+					board.generate_fraction(0.6);
+					ret = Some(Self::DifficultyChoice(board, NextState::Learn, assets.persistance.game_size));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) && handle_mouse {
-					ret = Some(Self::DifficultyChoice(NextState::Serious, assets.persistance.game_size));
+					let mut board = Board::new(assets.persistance.game_size);
+					board.generate_fraction(0.6);
+					ret = Some(Self::DifficultyChoice(board, NextState::Serious, assets.persistance.game_size));
 				}
 
 				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, GRAY, "HIGHSCORES", &cam, font, 0.05) && handle_mouse {
@@ -70,21 +76,34 @@ impl State {
 					ret = Some(State::Settings(board));
 				}
 			}
-			Self::DifficultyChoice(next, size) => {
-				
+			Self::DifficultyChoice(board, next, size) => {
+
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.7, y: -0.2, w: 2.4, h: 2.6 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+				board.draw(assets);
+
+
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
 
-				draw_centered_text(vec2(0.5, 0.35), "board size:", font, 0.1);
+				draw_centered_text(vec2(0.5, 0.5), "board size:", font, 0.1);
 
+				let old_size = *size;
 				let mut val = (*size as f32 - 2.0)/18.0;
-				slider(&mut val, 0.0, 1.0, vec2(0.2, 0.5), 0.6, GRAY, &camera);
+				slider(&mut val, 0.0, 1.0, vec2(0.2, 0.65), 0.6, GRAY, &camera);
 				*size = ((val*18.0 + 2.0)/2.0).round() as usize * 2;
 				
-				draw_centered_text(vec2(0.5, 0.65), format!("{size}").as_str(), font, 0.1);
+				draw_centered_text(vec2(0.5, 0.8), format!("{size}").as_str(), font, 0.1);
 
-				if button(&Rect{x: 0.35, y: 0.8, w: 0.3, h: 0.1}, GRAY, "PLAY", &camera, font, 0.08) {
+				if old_size != *size {
+					*board = Board::new(*size);
+					board.generate_fraction(0.6);
+				}
+
+				if button(&Rect{x: 0.35, y: 0.95, w: 0.3, h: 0.1}, GRAY, "PLAY", &camera, font, 0.08) {
 					assets.persistance.game_size = *size;
 					assets.persistance.save();
 					ret = Some(
