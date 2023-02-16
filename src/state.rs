@@ -82,7 +82,7 @@ impl State {
 				}
 				board.draw_errors();
 				board.draw_hint();
-				board.draw();
+				board.draw(&assets);
 				
 				let scale = 0.04;
 				let buttons = if screen_width() / screen_height() > 1.0 {
@@ -205,7 +205,7 @@ impl State {
 				}				
 				board.draw_errors();
 				board.draw_hint();
-				board.draw();
+				board.draw(&assets);
 				
 				
 				if handle_mouse {
@@ -265,7 +265,7 @@ impl State {
 				if handle_mouse && get_time() as f32 > *start_time {
 					board.handle_mouse(&camera);
 				}
-				board.draw();
+				board.draw(&assets);
 				
 				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) && handle_mouse && get_time() as f32 > *start_time {
 					ret = Some(State::ExitConfirmation(Box::new(State::Serious(board.clone(), *start_time, *finished_time))))
@@ -353,7 +353,7 @@ impl State {
 				if button(&Rect { x: 0.25, y: 0.6, w: 0.5, h: 0.1 }, GRAY, "Play Again", &cam, font, 0.07) {
 					match &**inner_state {
 						State::Serious(b, _, _) => {
-							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32, None));
+							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32 + 1.5, None));
 						}
 						State::Learn(b) => {
 							let board = Board::new_learn(b.size);

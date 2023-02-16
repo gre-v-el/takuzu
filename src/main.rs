@@ -1,4 +1,4 @@
-use std::{time::{SystemTime, UNIX_EPOCH}, collections::{HashMap, BTreeMap}};
+use std::{time::{SystemTime, UNIX_EPOCH}, collections::BTreeMap};
 use macroquad::{self, prelude::*};
 use takuzu::{state::State, Assets, Persistance};
 
@@ -10,11 +10,7 @@ use takuzu::{state::State, Assets, Persistance};
 		improve solving with the last rule
 		change colors (error highlight consumes the red tiles)
 
-		get cell colors from persistance
-
 		serde persistance
-
-		show current highscore on the end screen
 */
 
 fn window_config() -> Conf {
@@ -34,8 +30,9 @@ async fn main() {
 	let mut state = State::MainMenu;
 	let persistance = Persistance {
 		highscores: BTreeMap::from([(2, 5.0), (4, 11.0), (6, 40.0), (8, 100.0), (10, 200.0), (12, 400.0), (14, 700.0), (16, 1000.0), (18, 1500.0), (20, 2500.0)]),
-		color0: RED,
-		color1: Color { r: 0.0, g: 1.0, b: 1.0, a: 1.0 },
+		color0: GRAY,
+		color1: Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 },
+		color2: Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 },
 	};
 	let mut assets = Assets {
 		font: load_ttf_font_from_bytes(takuzu::FONT).unwrap(),

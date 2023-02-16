@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use macroquad::prelude::*;
-use crate::{cell_state::CellState, utils::draw_round_rect};
+use crate::{cell_state::CellState, utils::draw_round_rect, Assets};
 
 #[derive(Clone)]
 pub struct Board {
@@ -231,13 +231,13 @@ impl Board {
 		return [None; 2];
 	}
 
-	pub fn draw(&mut self) {
+	pub fn draw(&mut self, assets: &Assets) {
 		let m = 0.05 / self.size as f32;
 		let b = 0.1 / self.size as f32;
 		let w = 1.0 / self.size as f32;
 		for (y, row) in self.map.iter().enumerate() {
 			for (x, cell) in row.iter().enumerate() {
-				let color = cell.col();
+				let color = cell.col(assets);
 				let x = x as f32 / self.size as f32;
 				let y = y as f32 / self.size as f32;
 				draw_round_rect(x + m, y + m, w - 2.0*m, w - 2.0*m, b, color);

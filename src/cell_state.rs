@@ -1,5 +1,7 @@
 use macroquad::prelude::*;
 
+use crate::Assets;
+
 #[derive(Copy, Clone, Debug)]
 pub enum CellState {
 	None,
@@ -40,11 +42,11 @@ impl CellState {
 		}
 	}
 
-	pub fn col(&self) -> Color {
+	pub fn col(&self, assets: &Assets) -> Color {
 		match self {
-			CellState::None => GRAY,
-			CellState::False(_) => RED,
-			CellState::True(_) => Color { r: 0.0, g: 1.0, b: 1.0, a: 1.0 },
+			CellState::None => assets.persistance.color0,
+			CellState::True(_) => assets.persistance.color1,
+			CellState::False(_) => assets.persistance.color2,
 		}
 	}
 

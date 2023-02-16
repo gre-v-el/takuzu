@@ -22,6 +22,7 @@ pub struct Persistance {
 	pub highscores: BTreeMap<usize, f32>, // map size, time
 	pub color0: Color,
 	pub color1: Color,
+	pub color2: Color,
 }
 
 impl Persistance {
