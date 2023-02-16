@@ -37,7 +37,7 @@ impl State {
 					ret = Some(State::Learn(Board::new_learn(4)));
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, GRAY, "SERIOUS", &cam, font, 0.06) && handle_mouse {
-					ret = Some(State::Serious(Board::new_serious(4), get_time() as f32, None));
+					ret = Some(State::Serious(Board::new_serious(4), get_time() as f32 + 1.5, None));
 				}
 
 				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, GRAY, "highscores", &cam, font, 0.06) && handle_mouse {
@@ -252,23 +252,38 @@ impl State {
 					let (is_highscore, prev_time) = assets.persistance.insert_highscore(board.size, time);
 					ret = Some(State::EndScreen(Box::new(State::Serious(board.clone(), *start_time, Some(time))), if is_highscore {Some((time, prev_time))} else {None}));
 				}
-				let passed = if let Some(t) = *finished_time {t} else {get_time() as f32 - *start_time};
-				let mut str = format!("0{:.2}s", passed);
-				if passed >= 10.0 {str = str[1..].to_owned();}
-				
-				for (i, c) in str.chars().enumerate() {
-					draw_centered_text_stable(vec2(i as f32 * 0.07 + 0.04, -0.1), [c].iter().collect::<String>().as_str(), "0", font, 0.1);
+				if get_time() as f32 > *start_time {
+					let passed = if let Some(t) = *finished_time {t} else {get_time() as f32 - *start_time};
+					let mut str = format!("0{:.2}s", passed);
+					if passed >= 10.0 {str = str[1..].to_owned();}
+					
+					for (i, c) in str.chars().enumerate() {
+						draw_centered_text_stable(vec2(i as f32 * 0.07 + 0.04, -0.1), [c].iter().collect::<String>().as_str(), "0", font, 0.1);
+					}
 				}
 				
-				if handle_mouse {
+				if handle_mouse && get_time() as f32 > *start_time {
 					board.handle_mouse(&camera);
 				}
 				board.draw();
 				
-				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) && handle_mouse {
-					ret = Some(State::ExitConfirmation(Box::new(self.clone())));
+				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, GRAY, "Exit", &camera, font, 0.06) && handle_mouse && get_time() as f32 > *start_time {
+					ret = Some(State::ExitConfirmation(Box::new(State::Serious(board.clone(), *start_time, *finished_time))))
 				}
+
+				if *start_time > get_time() as f32 {
+					let countdown = ((*start_time - get_time() as f32) / 1.5 * 4.0).floor();
+					let t = 1.0 - ((*start_time - get_time() as f32) / 1.5 * 4.0).fract();
+					draw_rectangle(display_rect.x, display_rect.y, display_rect.w, display_rect.h, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.8 });
+					let col = Color {r: 1.0, g: 1.0, b: 1.0, a: (t*t*3.0).min(1.0)};
+					if countdown > 0.0 {
+						draw_centered_text_color(display_rect.center(), format!("{countdown}").as_str(), font, 0.4-t*0.2, col);
+					}
+					if countdown < 3.0 {
+						draw_centered_text(display_rect.center(), format!("{}", countdown+1.0).as_str(), font, 0.2-t*0.2);
+					}
 				
+				}
 			}
 			Self::ExitConfirmation(inner_state) => {
 				inner_state.update(assets, false);

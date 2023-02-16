@@ -12,9 +12,9 @@ use takuzu::{state::State, Assets, Persistance};
 
 		get cell colors from persistance
 
-		when spawning serious, set the start time to 3 seconds into the future. while drawing check the time and do a countdown (let the user click the screen to start now)
-
 		serde persistance
+
+		show current highscore on the end screen
 */
 
 fn window_config() -> Conf {
