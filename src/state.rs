@@ -335,7 +335,7 @@ impl State {
 							}
 							State::Serious(board, _, time) => {
 								draw_centered_text_color(allocated_rect.center() - vec2(0.0, 0.1), format!("time: {:.2}s", time.unwrap()).as_str(), font, 0.08, WHITE);
-								draw_centered_text_color(allocated_rect.center(), format!("highscore: {:.2}s", assets.persistance.highscores.get(&board.size).unwrap()).as_str(), font, 0.05, ORANGE);
+								draw_centered_text_color(allocated_rect.center(), format!("highscore: {:.2}s", assets.persistance.highscores[board.size/2 - 1].unwrap()).as_str(), font, 0.05, ORANGE);
 							}
 							_ => {}
 						}
@@ -378,9 +378,14 @@ impl State {
 					ret = Some(State::MainMenu);
 				}
 
-				for (i, (size, time)) in assets.persistance.highscores.iter().enumerate() {
-					let extra_space = if *size >= 20 {""} else if *size >= 10 {" "} else {"   "};
-					draw_centered_text_stable(vec2(0.5, 0.0 + i as f32 *0.1), format!("{extra_space}{}: {:.2}s", size, time).as_str(), "0: 000.00", font, 0.09);
+				let mut y = 0.0;
+				for (i, time) in assets.persistance.highscores.iter().enumerate() {
+					if let Some(t) = time {
+						let size = 2*(1+i);
+						let extra_space = if size >= 20 {""} else if size >= 10 {" "} else {"   "};
+						draw_centered_text_stable(vec2(0.5, y), format!("{extra_space}{}: {:.2}s", size, t).as_str(), "0: 000.00", font, 0.09);
+						y += 0.1;
+					}
 				}
 			}
 		}

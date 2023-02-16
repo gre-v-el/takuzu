@@ -44,9 +44,9 @@ impl CellState {
 
 	pub fn col(&self, assets: &Assets) -> Color {
 		match self {
-			CellState::None => assets.persistance.color0,
-			CellState::True(_) => assets.persistance.color1,
-			CellState::False(_) => assets.persistance.color2,
+			CellState::None => assets.persistance.color0.into(),
+			CellState::True(_) => assets.persistance.color1.into(),
+			CellState::False(_) => assets.persistance.color2.into(),
 		}
 	}
 
