@@ -35,14 +35,13 @@ impl State {
 				let cam = Camera2D::from_display_rect(rect_circumscribed_on_rect(display_area, screen_width()/screen_height()));
 				set_camera(&cam);
 				
-				clear_background(BLACK);
 				
-				if button(&Rect{x: 0.3, y: 0.2, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) && handle_mouse {
+				if button(&Rect{x: 0.3, y: 0.28, w: 0.4, h: 0.1}, GRAY, "SANDBOX", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, NextState::Sandbox, assets.persistance.game_size));
 				}
-				if button(&Rect{x: 0.3, y: 0.35, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) && handle_mouse {
+				if button(&Rect{x: 0.3, y: 0.39, w: 0.4, h: 0.1}, GRAY, "LEARN", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, NextState::Learn, assets.persistance.game_size));
@@ -57,7 +56,7 @@ impl State {
 					ret = Some(State::Highscores);
 				}
 
-				if button(&Rect{x: 0.3, y: 0.85, w: 0.4, h: 0.1}, GRAY, "SETTINGS", &cam, font, 0.05) && handle_mouse {
+				if button(&Rect{x: 0.3, y: 0.81, w: 0.4, h: 0.1}, GRAY, "SETTINGS", &cam, font, 0.05) && handle_mouse {
 					use crate::cell_state::CellState::*;
 					let board = Board { 
 						is_won: false, 

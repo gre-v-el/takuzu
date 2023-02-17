@@ -1,6 +1,6 @@
 use std::{fs::File, io::{Read, Write}};
 
-use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{GRAY, Color}};
+use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{GRAY, Color, Material, load_material, MaterialParams, UniformType}};
 use nanoserde::{DeBin, SerBin};
 
 
@@ -9,6 +9,7 @@ pub struct Assets {
 	pub font: Font,
 	pub gradient: Texture2D,
 	pub persistance: Persistance,
+	pub material: Material,
 }
 
 impl Assets {
@@ -16,7 +17,14 @@ impl Assets {
 		Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
-			persistance: Persistance::load()
+			persistance: Persistance::load(),
+			material: load_material(include_str!("shaders/vertex.glsl"), include_str!("shaders/fragment.glsl"), MaterialParams {
+				uniforms: vec![
+					("aspect".to_string(), UniformType::Float1),
+					("time".to_string(), UniformType::Float1)
+				],
+				..Default::default()
+			}).unwrap()
 		}
 	}
 }
