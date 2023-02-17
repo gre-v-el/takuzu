@@ -48,9 +48,9 @@ async fn main() {
 		gl_use_material(assets.material);
 		draw_rectangle(0.0, 0.0, 1.0, 1.0, WHITE);
 		gl_use_default_material();
-		if let Some(s) = state.update(&mut assets, true) {
-			state = s;
-		}
+		// if let Some(s) = state.update(&mut assets, true) {
+		// 	state = s;
+		// }
 
         next_frame().await
     }

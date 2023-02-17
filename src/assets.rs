@@ -18,7 +18,7 @@ impl Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
 			persistance: Persistance::load(),
-			material: load_material(include_str!("shaders/vertex.glsl"), include_str!("shaders/fragment.glsl"), MaterialParams {
+			material: load_material(include_str!("shaders/vertex.vert"), include_str!("shaders/mandelbrot.frag"), MaterialParams {
 				uniforms: vec![
 					("aspect".to_string(), UniformType::Float1),
 					("time".to_string(), UniformType::Float1)

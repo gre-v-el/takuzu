@@ -1,7 +1,7 @@
 #version 100
 precision highp float;
-varying vec2 uv;
 
+varying vec2 uv;
 uniform float time;
 
 
@@ -10,13 +10,6 @@ uniform float time;
 // Hazel Quantock
 // This code is licensed under the CC0 license http://creativecommons.org/publicdomain/zero/1.0/
 
-
-// Gamma correction
-#define GAMMA 2.2
-
-vec3 to_gamma(vec3 col) {
-	return pow(col, vec3(1.0/GAMMA));
-}
 
 float random(vec2 v) {
 	v = fract(v/128.)*128. + vec2(-64.340622, -72.465622);
@@ -27,7 +20,7 @@ float random(vec2 v) {
 void main() {
 	vec3 ray = vec3(uv, 1.0);
 
-	float offset = time*0.1;	
+	float offset = time*0.1;
 	float speed2 = 0.2;
 	float speed = 0.3;
 	
@@ -47,5 +40,5 @@ void main() {
 		pos += stp;
 	}
 	
-	gl_FragColor = vec4(to_gamma(col)*0.5,1.0);
+	gl_FragColor = vec4(col*0.5,1.0);
 }
