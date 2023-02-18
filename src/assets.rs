@@ -18,7 +18,7 @@ impl Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
 			persistance: Persistance::load(),
-			material: load_material(include_str!("vertex.vert"), include_str!("shaders/torus.frag"), MaterialParams {
+			material: load_material(include_str!("vertex.vert"), include_str!("shaders/sunrise.frag"), MaterialParams {
 				uniforms: vec![
 					("time".to_string(), UniformType::Float1),
 					("resolution".to_string(), UniformType::Float2),

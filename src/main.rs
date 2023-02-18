@@ -17,6 +17,8 @@ use takuzu::{state::State, assets::Assets};
 
 		sound design and music
 		logo
+
+		transparent UI?
 */
 
 fn window_config() -> Conf {
