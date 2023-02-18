@@ -36,12 +36,12 @@ async fn main() {
 	let mut state = State::MainMenu;
 	let mut assets = Assets::get();
 
-	let mut aspect = screen_width()/screen_height();
-	assets.material.set_uniform("aspect", aspect);
+	let mut resolution = (screen_width(), screen_height());
+	assets.material.set_uniform("resolution", resolution);
     loop {
-		if screen_width()/screen_height() != aspect {
-			aspect = screen_width()/screen_height();
-			assets.material.set_uniform("aspect", aspect);
+		if (screen_width(), screen_height()) != resolution {
+			resolution = (screen_width(), screen_height());
+			assets.material.set_uniform("resolution", resolution);
 		}
 		assets.material.set_uniform("time", get_time() as f32);
 		set_camera(&Camera2D::from_display_rect(Rect{x: 0.0, y: 0.0, w: 1.0, h: 1.0}));
