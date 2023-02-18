@@ -12,7 +12,7 @@ uniform vec2 resolution;
 // Here's my interpretation of the wallpaper in shader form
 
 #define RESOLUTION    resolution
-#define TIME          time
+#define TIME          time*0.6
 #define PI            3.141592654
 #define TAU           (2.0*PI)
 #define ROT(a)        mat2(cos(a), sin(a), -sin(a), cos(a))
@@ -265,5 +265,5 @@ void main() {
   col = effect(p, q);
   col = aces_approx(col);
   col = sRGB(col);
-  gl_FragColor = vec4(col, 1.0);
+  gl_FragColor = vec4(col*0.4, 1.0);
 }
