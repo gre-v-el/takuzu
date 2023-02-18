@@ -115,5 +115,5 @@ void main() {
 	vec2 pp = p;
 	p.x *= RESOLUTION.x/RESOLUTION.y;
 	vec3 col = effect(p, pp);
-	gl_FragColor = vec4(col * 0.5, 1.0);
+	gl_FragColor = vec4(col * 0.3, 1.0);
 }
