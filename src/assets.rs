@@ -1,6 +1,6 @@
 use std::{fs::File, io::{Read, Write}};
 
-use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{GRAY, Color, Material, load_material, MaterialParams, UniformType}};
+use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{Color, Material, load_material, MaterialParams, UniformType, DARKGRAY}};
 use nanoserde::{DeBin, SerBin};
 
 
@@ -71,7 +71,7 @@ impl Persistance {
 			Err(_) => {
 				Persistance {
 					highscores: [None; 10],
-					color0: GRAY.into(),
+					color0: DARKGRAY.into(),
 					color1: Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into(),
 					color2: Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into(),
 					game_size: 4,
