@@ -4,7 +4,6 @@ use takuzu::{state::State, assets::Assets};
 
 /*
 	TODO:
-		write some background shaders
 		improve solving with the last rule
 
 		add generating board screen (when the generation lasts more than 3 seconds, add confirmation (if it's serious))
@@ -37,20 +36,10 @@ async fn main() {
 
 	let mut state = State::MainMenu;
 	let mut assets = Assets::get();
-	let mut material = rand::gen_range(0usize, assets.materials.len());
 
-	let mut resolution = (screen_width(), screen_height());
-	assets.materials[material].set_uniform("resolution", resolution);
     loop {
-		if (screen_width(), screen_height()) != resolution {
-			resolution = (screen_width(), screen_height());
-			assets.materials[material].set_uniform("resolution", resolution);
-		}
-		assets.materials[material].set_uniform("time", get_time() as f32);
-		set_camera(&Camera2D::from_display_rect(Rect{x: 0.0, y: 0.0, w: 1.0, h: 1.0}));
-		gl_use_material(assets.materials[material]);
-		draw_rectangle(0.0, 0.0, 1.0, 1.0, WHITE);
-		gl_use_default_material();
+		assets.draw_material();
+		
 		if let Some(s) = state.update(&mut assets, true) {
 			state = s;
 		}

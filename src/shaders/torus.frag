@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/fd33zn
 // License CC0: Saturday Torus
@@ -196,5 +197,5 @@ void main() {
   p.y *= RESOLUTION.y/RESOLUTION.x;
   vec3 col = color(p, q);
   col = postProcess(col, q);
-  gl_FragColor = vec4(col*0.3, 1.0);
+  gl_FragColor = vec4(col*0.3, alpha);
 }

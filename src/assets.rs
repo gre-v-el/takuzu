@@ -1,6 +1,7 @@
 use std::{fs::{File, self}, io::{Read, Write}};
 
-use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{Color, Material, load_material, MaterialParams, UniformType, DARKGRAY}};
+// use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{Color, Material, load_material, MaterialParams, UniformType, DARKGRAY}, rand, time::get_time, window::{screen_width, screen_height}};
+use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}};
 use nanoserde::{DeBin, SerBin};
 
 
@@ -10,6 +11,8 @@ pub struct Assets {
 	pub gradient: Texture2D,
 	pub persistance: Persistance,
 	pub materials: Vec<Material>,
+	pub material: usize,
+	pub secondary_material: Option<(usize, f32)>, // id, time
 }
 
 impl Assets {
@@ -28,7 +31,21 @@ impl Assets {
 							uniforms: vec![
 								("time".to_string(), UniformType::Float1),
 								("resolution".to_string(), UniformType::Float2),
+								("alpha".to_string(), UniformType::Float1),
 							],
+							pipeline_params: PipelineParams {
+								alpha_blend: Some(BlendState::new(
+									Equation::Add,
+									BlendFactor::Value(BlendValue::SourceAlpha),
+									BlendFactor::OneMinusValue(BlendValue::SourceAlpha)
+								)),
+								color_blend: Some(BlendState::new(
+									Equation::Add,
+									BlendFactor::Value(BlendValue::SourceAlpha),
+									BlendFactor::OneMinusValue(BlendValue::SourceAlpha)
+								)),
+								..Default::default()
+							},
 							..Default::default()
 						}).unwrap())
 				}
@@ -41,8 +58,52 @@ impl Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
 			persistance: Persistance::load(),
-			materials
+			material: 0,//rand::gen_range(0, materials.len()),
+			materials,
+			secondary_material: None,
 		}
+	}
+
+	pub fn material(&self) -> &Material {
+		&self.materials[self.material]
+	}
+
+	pub fn change_material(&mut self) {
+		if let Option::None = self.secondary_material {
+			self.secondary_material = Some((self.material, get_time() as f32));
+			self.material = rand::gen_range(0, self.materials.len());
+		}
+	}
+
+	pub fn draw_material(&mut self) {
+
+		set_camera(&Camera2D::from_display_rect(Rect{x: 0.0, y: 0.0, w: 1.0, h: 1.0}));
+
+		self.material().set_uniform("resolution", (screen_width(), screen_height()));
+		self.material().set_uniform("time", get_time() as f32);
+		self.material().set_uniform("alpha", 1.0f32);
+
+		gl_use_material(*self.material());
+		draw_rectangle(0.0, 0.0, 1.0, 1.0, WHITE);
+
+		
+		if let Some((id, time)) = self.secondary_material {
+			let a = 1.0 - (get_time() as f32 - time) / 5.0;
+			self.materials[id].set_uniform("resolution", (screen_width(), screen_height()));
+			self.materials[id].set_uniform("time", get_time() as f32);
+			self.materials[id].set_uniform("alpha", a);
+
+
+			gl_use_material(self.materials[id]);
+			draw_rectangle(0.0, 0.0, 1.0, 1.0, WHITE);
+
+			if a < 0.0 {
+				self.secondary_material = None;
+			}
+		}
+
+		
+		gl_use_default_material();
 	}
 }
 

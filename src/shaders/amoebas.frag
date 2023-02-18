@@ -3,6 +3,7 @@ precision highp float;
 
 varying vec2 uv;
 uniform float time;
+uniform float alpha;
 uniform vec2 resolution;
 
 // https://www.shadertoy.com/view/7d23DR
@@ -72,6 +73,6 @@ void main() {
   col = mix(col, vec3(.0), smoothstep(-aa, aa, -d));
 
   col = postProcess(col, q);
-  gl_FragColor = vec4(col*0.4, 1.0);
+  gl_FragColor = vec4(col*0.4, alpha);
 }
 

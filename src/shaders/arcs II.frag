@@ -3,6 +3,7 @@ precision highp float;
 
 varying vec2 uv;
 uniform float time;
+uniform float alpha;
 uniform vec2 resolution;
 
 // https://www.shadertoy.com/view/mlf3Rl
@@ -101,5 +102,5 @@ void main() {
   vec3 bcol = hsv2rgb(vec3(d2.y, 0.9, smoothstep(10.0*aa, 20.0*aa, length(p))));
   col = mix(col, bcol, smoothstep(aa, -aa, d2.x));
   col = sqrt(col);
-  gl_FragColor = vec4(col * 0.2, 1.0);
+  gl_FragColor = vec4(col * 0.2, alpha);
 }

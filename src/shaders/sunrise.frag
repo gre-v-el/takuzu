@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/7dyyRy
 // CC0 - Neonwave sunrise
@@ -358,5 +359,5 @@ void main() {
   col = effect(p, q);
   col = aces_approx(col);
   col = sRGB(col);
-  gl_FragColor = vec4(col*0.4, 1.0);
+  gl_FragColor = vec4(col*0.4, alpha);
 }

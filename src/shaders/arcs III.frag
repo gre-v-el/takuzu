@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/mlXGzs
 // CC0: Infinite Arcs III
@@ -110,5 +111,5 @@ void main() {
   vec2 pp = p;
   p.x *= RESOLUTION.x/RESOLUTION.y;
   vec3 col = effect(p, pp);
-  gl_FragColor = vec4(col*0.2, 1.0);
+  gl_FragColor = vec4(col*0.2, alpha);
 }

@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/DlB3WG
 // CC0: Mind flowers
@@ -238,5 +239,5 @@ void main() {
 
   vec3 col = effect(p, q);
   
-  gl_FragColor = vec4(col*0.2, 1.0);
+  gl_FragColor = vec4(col*0.2, alpha);
 }

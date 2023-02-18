@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/dlXGWB
 
@@ -174,5 +175,5 @@ void main() {
   col = aces_approx(col);
   col = sRGB(col);
   
-  gl_FragColor = vec4(col*0.5, 1.0);
+  gl_FragColor = vec4(col*0.5, alpha);
 }

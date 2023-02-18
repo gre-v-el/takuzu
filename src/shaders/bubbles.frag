@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // CC0: Colorful bubbles underwater
 // https://www.shadertoy.com/view/dtBSRV
@@ -115,5 +116,5 @@ void main() {
 	vec2 pp = p;
 	p.x *= RESOLUTION.x/RESOLUTION.y;
 	vec3 col = effect(p, pp);
-	gl_FragColor = vec4(col * 0.3, 1.0);
+	gl_FragColor = vec4(col * 0.3, alpha);
 }

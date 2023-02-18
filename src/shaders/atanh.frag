@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/sddfR4
 // License CC0: More Complex Atanh
@@ -129,5 +130,5 @@ void main() {
   col = clamp(col, 0.0, 1.0);
   col = sqrt(col);
   
-  gl_FragColor = vec4(col*0.2, 1.0);
+  gl_FragColor = vec4(col*0.2, alpha);
 }

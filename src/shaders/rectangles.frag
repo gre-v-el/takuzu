@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/dtXGWj
 // CC0: Trippy rectangles
@@ -153,6 +154,6 @@ void main() {
   col += hsv2rgb(vec3(hue, 0.66, 4.0))*mix(1.0, 0.0, tanh_approx(2.0*sqrt(length(p))));
   col *= smoothstep(1.5, 0.5, length(ppp));
   col = sqrt(col);
-  gl_FragColor = vec4(col*0.2, 1.0);
+  gl_FragColor = vec4(col*0.2, alpha);
 }
 

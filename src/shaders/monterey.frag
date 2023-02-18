@@ -4,6 +4,7 @@ precision highp float;
 varying vec2 uv;
 uniform float time;
 uniform vec2 resolution;
+uniform float alpha;
 
 // https://www.shadertoy.com/view/NdVfzK
 // CC0 - Monterey wannabe
@@ -265,5 +266,5 @@ void main() {
   col = effect(p, q);
   col = aces_approx(col);
   col = sRGB(col);
-  gl_FragColor = vec4(col*0.4, 1.0);
+  gl_FragColor = vec4(col*0.4, alpha);
 }

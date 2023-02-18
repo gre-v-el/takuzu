@@ -505,6 +505,10 @@ impl State {
 			}
 		}
 		
+		if let Some(Self::MainMenu) = ret {
+			assets.change_material();
+		}
+
 		ret
 	}
 }
