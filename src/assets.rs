@@ -1,4 +1,4 @@
-use std::{fs::File, io::{Read, Write}};
+use std::{fs::{File, self}, io::{Read, Write}};
 
 use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{Color, Material, load_material, MaterialParams, UniformType, DARKGRAY}};
 use nanoserde::{DeBin, SerBin};
@@ -9,22 +9,39 @@ pub struct Assets {
 	pub font: Font,
 	pub gradient: Texture2D,
 	pub persistance: Persistance,
-	pub material: Material,
+	pub materials: Vec<Material>,
 }
 
 impl Assets {
 	pub fn get() -> Self {
+		let mut materials = Vec::new();
+		let paths = fs::read_dir("src/shaders").unwrap();
+
+		for path in paths {
+			match path {
+				Ok(entry) => {
+					let frag = fs::read_to_string(entry.path()).unwrap();
+					materials.push(load_material(
+						include_str!("vertex.vert"), 
+						frag.as_str(), 
+						MaterialParams {
+							uniforms: vec![
+								("time".to_string(), UniformType::Float1),
+								("resolution".to_string(), UniformType::Float2),
+							],
+							..Default::default()
+						}).unwrap())
+				}
+				Err(_) => {}
+			}
+		}
+
+
 		Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
 			persistance: Persistance::load(),
-			material: load_material(include_str!("vertex.vert"), include_str!("shaders/sunrise.frag"), MaterialParams {
-				uniforms: vec![
-					("time".to_string(), UniformType::Float1),
-					("resolution".to_string(), UniformType::Float2),
-				],
-				..Default::default()
-			}).unwrap()
+			materials
 		}
 	}
 }
