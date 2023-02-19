@@ -136,7 +136,8 @@ impl State {
 				
 				let status_color = if board.is_won {Some(GREEN)} else if board.is_valid {None} else {Some(RED)};
 				
-				if let Some(c) = status_color {
+				if let Some(mut c) = status_color {
+					c.a = board.get_error_alpha();
 					let w = 0.2;
 					draw_texture_ex(assets.gradient, display_rect.left(), display_rect.top(), c, 
 					DrawTextureParams { 

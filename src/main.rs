@@ -8,7 +8,6 @@ use takuzu::{state::State, assets::Assets};
 
 		add generating board screen (when the generation lasts more than 3 seconds, add confirmation (if it's serious))
 		tutorial
-		show error after some delay (animation of fading and pulsing)
 		difficulty choice (how many tiles)
 		show locked more intuitively
 
