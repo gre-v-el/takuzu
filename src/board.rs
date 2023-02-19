@@ -10,6 +10,7 @@ pub struct Board {
 	pub size: usize,
 	pub map: Vec<Vec<CellState>>,
 	pub error: [Option<(usize, usize, usize, usize)>; 2], // up to two regions on the board
+	pub error_time: f32,
 	pub hint: Option<(usize, usize)>,
 	pub show_locked: Option<f32>,
 }
@@ -22,6 +23,7 @@ impl Board {
 			size,
 			map: vec![vec![CellState::None; size]; size],
 			error: [None; 2],
+			error_time: 0.0,
 			hint: None,
 			show_locked: None,
 		};
@@ -168,9 +170,11 @@ impl Board {
 			}
 
 			self.error = resp1;
+			self.error_time = get_time() as f32;
 		}
 		else if resp2[0].is_some() {
 			self.error = resp2;
+			self.error_time = get_time() as f32;
 		}
 		else {
 			self.error = [None; 2];
@@ -287,6 +291,11 @@ impl Board {
 		}
 	}
 
+	pub fn get_error_alpha(&self) -> f32 {
+		let t = (get_time() as f32 - self.error_time - 0.3).max(0.0);
+		1.0-((5.0*t).cos() * 0.5 + 0.5)
+	}
+
 	fn draw_error(&self, e: &(usize, usize, usize, usize)) {
 		let m = 0.05 / self.size as f32;
 		let b = 0.13 / self.size as f32;
@@ -296,7 +305,7 @@ impl Board {
 			e.2 as f32 / self.size as f32 + 2.0*m, 
 			e.3 as f32 / self.size as f32 + 2.0*m, 
 			b, 
-			Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }
+			Color { r: 1.0, g: 0.0, b: 0.0, a: self.get_error_alpha() }
 		);
 	}
 

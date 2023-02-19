@@ -69,6 +69,7 @@ impl State {
 							vec![False(false), False(false), None, True(false)],
 						], 
 						error: [Option::Some((1, 1, 3, 1)), Option::None],
+						error_time: 0.0,
 						hint: Some((2, 3)),
 						show_locked: Option::None
 					}; 
@@ -258,7 +259,8 @@ impl State {
 				
 				let status_color = if board.is_won {Some(GREEN)} else if board.is_valid {None} else {Some(RED)};
 				
-				if let Some(c) = status_color {
+				if let Some(mut c) = status_color {
+					c.a = board.get_error_alpha();
 					let w = 0.2;
 					draw_texture_ex(assets.gradient, display_rect.left(), display_rect.top(), c, 
 					DrawTextureParams { 
