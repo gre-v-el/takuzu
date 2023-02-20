@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, assets::Assets, PRI_BUTTON_COL, SEC_BUTTON_COL, SLIDER_COL, POPUP_COL, POPUP_EDGE_COL, FORWARD, BACKWARD};
+use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, assets::Assets, PRI_BUTTON_COL, SEC_BUTTON_COL, SLIDER_COL, POPUP_COL, POPUP_EDGE_COL, FORWARD, BACKWARD, TICK};
 use macroquad::prelude::*;
 
 #[derive(Clone)]
@@ -15,7 +15,7 @@ pub enum State {
 	MainMenu,
 	Sandbox(Board),
 	Learn(Board),
-	Serious(Board, f32, Option<f32>), // start time, finished time
+	Serious(Board, f32, Option<f32>, usize), // start time, finished time, completed tick sound plays
 	EndScreen(Box<State>, Option<(f32, Option<f32>)>), // is highscore - new time, previous time (if any)
 	ExitConfirmation(Box<State>),
 	Highscores,
@@ -75,7 +75,8 @@ impl State {
 						error: [Option::Some((1, 1, 3, 1)), Option::None],
 						error_time: 0.0,
 						hint: Some((2, 3)),
-						show_locked: Option::None
+						show_locked: Option::None,
+						last_error_sound: -1.0,
 					}; 
 					ret = Some(State::Settings(board));
 					assets.play_sound(FORWARD);
@@ -115,7 +116,7 @@ impl State {
 						match next {
 							NextState::Sandbox => State::Sandbox(Board::new(*size)),
 							NextState::Learn => State::Learn(Board::new_learn(*size)),
-							NextState::Serious => State::Serious(Board::new_serious(*size), get_time() as f32 + 1.5, None),
+							NextState::Serious => State::Serious(Board::new_serious(*size), get_time() as f32 + 1.5, None, 0),
 						}
 					);
 					assets.play_sound(FORWARD);
@@ -165,7 +166,7 @@ impl State {
 				if handle_mouse {
 					board.handle_mouse(&camera, &assets);
 				}
-				board.draw_errors();
+				board.draw_errors(&assets);
 				board.draw_hint();
 				board.draw(&assets);
 				
@@ -300,7 +301,7 @@ impl State {
 				if handle_mouse {
 					board.handle_mouse(&camera, &assets);
 				}				
-				board.draw_errors();
+				board.draw_errors(&assets);
 				board.draw_hint();
 				board.draw(&assets);
 				
@@ -319,7 +320,7 @@ impl State {
 					}
 				}
 			}
-			Self::Serious(board, start_time, finished_time) => {
+			Self::Serious(board, start_time, finished_time, sounds) => {
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
@@ -348,7 +349,7 @@ impl State {
 					let time = get_time() as f32 - *start_time;
 					*finished_time = Some(time);
 					let (is_highscore, prev_time) = assets.persistance.insert_highscore(board.size, time);
-					ret = Some(State::EndScreen(Box::new(State::Serious(board.clone(), *start_time, Some(time))), if is_highscore {Some((time, prev_time))} else {None}));
+					ret = Some(State::EndScreen(Box::new(State::Serious(board.clone(), *start_time, Some(time), *sounds)), if is_highscore {Some((time, prev_time))} else {None}));
 				}
 				if get_time() as f32 > *start_time {
 					let passed = if let Some(t) = *finished_time {t} else {get_time() as f32 - *start_time};
@@ -367,7 +368,7 @@ impl State {
 				
 				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Exit", &camera, font, 0.06) && handle_mouse && get_time() as f32 > *start_time {
 					assets.play_sound(BACKWARD);
-					ret = Some(State::ExitConfirmation(Box::new(State::Serious(board.clone(), *start_time, *finished_time))))
+					ret = Some(State::ExitConfirmation(Box::new(State::Serious(board.clone(), *start_time, *finished_time, *sounds))))
 				}
 
 				if *start_time > get_time() as f32 {
@@ -381,7 +382,11 @@ impl State {
 					if countdown < 3.0 {
 						draw_centered_text(display_rect.center(), format!("{}", countdown+1.0).as_str(), font, 0.2-t*0.2);
 					}
-				
+					
+					if countdown > 0.0 && 3.0 - (*sounds as f32) >= countdown {
+						*sounds += 1;
+						assets.play_sound(TICK);
+					}
 				}
 			}
 			Self::ExitConfirmation(inner_state) => {
@@ -434,7 +439,7 @@ impl State {
 							State::Learn(_) => {
 								draw_centered_text_color(allocated_rect.center(), "(No scores in Learn mode)", font, 0.03, GRAY);
 							}
-							State::Serious(board, _, time) => {
+							State::Serious(board, _, time, _) => {
 								draw_centered_text_color(allocated_rect.center() - vec2(0.0, 0.1), format!("time: {:.2}s", time.unwrap()).as_str(), font, 0.08, WHITE);
 								draw_centered_text_color(allocated_rect.center(), format!("highscore: {:.2}s", assets.persistance.highscores[board.size/2 - 1].unwrap()).as_str(), font, 0.05, ORANGE);
 							}
@@ -454,8 +459,8 @@ impl State {
 				if button(&Rect { x: 0.25, y: 0.6, w: 0.5, h: 0.1 }, PRI_BUTTON_COL, "Play Again", &cam, font, 0.07) {
 					assets.play_sound(FORWARD);
 					match &**inner_state {
-						State::Serious(b, _, _) => {
-							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32 + 1.5, None));
+						State::Serious(b, _, _, _) => {
+							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32 + 1.5, None, 0));
 						}
 						State::Learn(b) => {
 							let board = Board::new_learn(b.size);
@@ -498,7 +503,7 @@ impl State {
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
 
-				board.draw_errors();
+				board.draw_errors(&assets);
 				board.draw_hint();
 				board.draw(assets);
 

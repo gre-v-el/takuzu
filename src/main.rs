@@ -22,7 +22,7 @@ fn window_config() -> Conf {
         window_title: "Takuzu".into(),
         fullscreen: false,
 		window_width: 500,
-		window_height: 800,
+		window_height: 500,
         ..Default::default()
     }
 }

@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use macroquad::prelude::*;
-use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT};
+use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT, ERROR};
 
 #[derive(Clone)]
 pub struct Board {
@@ -13,6 +13,7 @@ pub struct Board {
 	pub error_time: f32,
 	pub hint: Option<(usize, usize)>,
 	pub show_locked: Option<f32>,
+	pub last_error_sound: f32,
 }
 
 impl Board {
@@ -26,6 +27,7 @@ impl Board {
 			error_time: 0.0,
 			hint: None,
 			show_locked: None,
+			last_error_sound: -1.0,
 		};
 
 		s
@@ -286,12 +288,12 @@ impl Board {
 		}
 	}
 
-	pub fn draw_errors(&self) {
+	pub fn draw_errors(&mut self, assets: &Assets) {
 		if let Some(e) = self.error[0] {
-			self.draw_error(&e);
+			self.draw_error(&e, assets);
 		}
 		if let Some(e) = self.error[1] {
-			self.draw_error(&e);
+			self.draw_error(&e, assets);
 		}
 	}
 
@@ -300,17 +302,23 @@ impl Board {
 		1.0-((5.0*t).cos() * 0.5 + 0.5)
 	}
 
-	fn draw_error(&self, e: &(usize, usize, usize, usize)) {
+	fn draw_error(&mut self, e: &(usize, usize, usize, usize), assets: &Assets) {
 		let m = 0.05 / self.size as f32;
 		let b = 0.13 / self.size as f32;
+		let alpha = self.get_error_alpha();
 		draw_round_rect(
 			e.0 as f32 / self.size as f32 - m, 
 			e.1 as f32 / self.size as f32 - m, 
 			e.2 as f32 / self.size as f32 + 2.0*m, 
 			e.3 as f32 / self.size as f32 + 2.0*m, 
 			b, 
-			Color { r: 1.0, g: 0.0, b: 0.0, a: self.get_error_alpha() }
+			Color { r: 1.0, g: 0.0, b: 0.0, a: alpha }
 		);
+
+		if alpha > 0.3 && get_time() as f32 - self.last_error_sound > 1.0 {
+			self.last_error_sound = get_time() as f32;
+			assets.play_sound(ERROR);
+		}
 	}
 
 	pub fn generate_valid(&mut self) -> u32 {
