@@ -14,9 +14,23 @@ const MUSIC: [&[u8]; 4] = [
 	include_bytes!("../assets/music/lofi-study-112191.ogg"),
 	include_bytes!("../assets/music/unpacking-loop-ycle-138250.ogg"),
 ];
-const SFX: [&[u8]; 1] = [
+const SFX: [&[u8]; 7] = [
 	include_bytes!("../assets/sfx/pop.ogg"),
+	include_bytes!("../assets/sfx/forward.ogg"),
+	include_bytes!("../assets/sfx/backward.ogg"),
+	include_bytes!("../assets/sfx/locked.ogg"),
+	include_bytes!("../assets/sfx/error.ogg"),
+	include_bytes!("../assets/sfx/hint.ogg"),
+	include_bytes!("../assets/sfx/tick.ogg"),
 ];
+const SFX_VOLUMES: [f32; 7] = [0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+const POP: usize = 0;
+const FORWARD: usize = 1;
+const BACKWARD: usize = 2;
+const LOCKED: usize = 3;
+const ERROR: usize = 4;
+const HINT: usize = 5;
+const TICK: usize = 6;
 
 const PRI_BUTTON_COL: Color = Color {r: 0.00, g: 0.38, b: 0.91, a: 0.5};
 const SEC_BUTTON_COL: Color = Color {r: 0.48, g: 0.54, b: 0.68, a: 0.5};

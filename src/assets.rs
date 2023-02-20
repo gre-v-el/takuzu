@@ -5,7 +5,7 @@ use pollster::FutureExt;
 use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams}};
 use nanoserde::{DeBin, SerBin};
 
-use crate::{MUSIC, SFX};
+use crate::{MUSIC, SFX, SFX_VOLUMES};
 
 
 #[derive(Clone)]
@@ -18,7 +18,6 @@ pub struct Assets {
 	pub secondary_material: Option<(usize, f32)>, // id, time
 	pub music: Vec<Sound>,
 	pub sfx: Vec<Sound>,
-	pub sfx_volumes: Vec<f32>,
 }
 
 impl Assets {
@@ -73,12 +72,11 @@ impl Assets {
 			secondary_material: None,
 			music,
 			sfx,
-			sfx_volumes: vec![0.5],
 		}
 	}
 
 	pub fn play_sound(&self, id: usize) {
-		play_sound(self.sfx[id], PlaySoundParams { looped: false, volume: self.sfx_volumes[id] });
+		play_sound(self.sfx[id], PlaySoundParams { looped: false, volume: SFX_VOLUMES[id] });
 	}
 
 	pub fn material(&self) -> &Material {

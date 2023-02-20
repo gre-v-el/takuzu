@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use macroquad::prelude::*;
-use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets};
+use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT};
 
 #[derive(Clone)]
 pub struct Board {
@@ -65,16 +65,17 @@ impl Board {
 
 		if self.map[y][x].is_locked() {
 			self.show_locked = Some(get_time() as f32);
+			assets.play_sound(LOCKED);
 			return;
 		}
 
 		if is_mouse_button_down(MouseButton::Left) {
 			self.map[y][x] = self.map[y][x].next();
-			assets.play_sound(0);
+			assets.play_sound(POP);
 		}
 		else {
 			self.map[y][x] = self.map[y][x].prev();
-			assets.play_sound(0);
+			assets.play_sound(POP);
 		}
 
 		self.verify_board();
@@ -103,7 +104,7 @@ impl Board {
 		counter
 	}
 
-	pub fn generate_hint(&mut self) {
+	pub fn generate_hint(&mut self, assets: &Assets) {
 		let mut vec = Vec::new();
 		let mut clone = self.clone();
 		
@@ -140,6 +141,7 @@ impl Board {
 
 		if vec.len() != 0 {
 			self.hint = Some(*vec.choose().unwrap());
+			assets.play_sound(HINT);
 		}
 	}
 

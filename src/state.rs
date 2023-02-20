@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, assets::Assets, PRI_BUTTON_COL, SEC_BUTTON_COL, SLIDER_COL, POPUP_COL, POPUP_EDGE_COL};
+use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, assets::Assets, PRI_BUTTON_COL, SEC_BUTTON_COL, SLIDER_COL, POPUP_COL, POPUP_EDGE_COL, FORWARD, BACKWARD};
 use macroquad::prelude::*;
 
 #[derive(Clone)]
@@ -40,20 +40,24 @@ impl State {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, NextState::Sandbox, assets.persistance.game_size));
+					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.39, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "LEARN", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, NextState::Learn, assets.persistance.game_size));
+					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SERIOUS", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, NextState::Serious, assets.persistance.game_size));
+					assets.play_sound(FORWARD);
 				}
 
 				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, SEC_BUTTON_COL, "HIGHSCORES", &cam, font, 0.05) && handle_mouse {
 					ret = Some(State::Highscores);
+					assets.play_sound(FORWARD);
 				}
 
 				if button(&Rect{x: 0.3, y: 0.81, w: 0.4, h: 0.1}, SEC_BUTTON_COL, "SETTINGS", &cam, font, 0.05) && handle_mouse {
@@ -74,6 +78,7 @@ impl State {
 						show_locked: Option::None
 					}; 
 					ret = Some(State::Settings(board));
+					assets.play_sound(FORWARD);
 				}
 			}
 			Self::DifficultyChoice(board, next, size) => {
@@ -113,12 +118,14 @@ impl State {
 							NextState::Serious => State::Serious(Board::new_serious(*size), get_time() as f32 + 1.5, None),
 						}
 					);
+					assets.play_sound(FORWARD);
 				}
 
 				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Back", &camera, font, 0.06) {
 					ret = Some(State::MainMenu);
 					assets.persistance.game_size = *size;
 					assets.persistance.save();
+					assets.play_sound(BACKWARD);
 				}
 			}
 			Self::Sandbox(board) => {
@@ -207,48 +214,59 @@ impl State {
 				};
 				
 				if button(&buttons[0], PRI_BUTTON_COL, "Generate", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.generate_valid();
 				}
 				if button(&buttons[1], PRI_BUTTON_COL, "Purge some", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.degenerate();
 					board.verify_board();
 				}
 				if button(&buttons[2], PRI_BUTTON_COL, "Purge all", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.purge_redundancies();
 					board.verify_board();
 				}
 				if button(&buttons[3], PRI_BUTTON_COL, "Clear", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.reset();
 				}
 				if button(&buttons[4], PRI_BUTTON_COL, "Surround", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.surround_doubles();
 					board.verify_board();
 				}
 				if button(&buttons[5], PRI_BUTTON_COL, "De-Surround", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.desurround_doubles(1.0);
 					board.verify_board();
 				}
 				if button(&buttons[6], PRI_BUTTON_COL, "Separate", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.separate_triples();
 					board.verify_board();
 				}
 				if button(&buttons[7], PRI_BUTTON_COL, "De-Separate", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.deseparate_triples(1.0);
 					board.verify_board();
 				}
 				if button(&buttons[8], PRI_BUTTON_COL, "Fill", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.fill_rows();
 					board.verify_board();
 				}
 				if button(&buttons[9], PRI_BUTTON_COL, "De-Fill", &camera, font, scale) && handle_mouse {
+					assets.play_sound(FORWARD);
 					board.defill_rows(1.0);
 					board.verify_board();
 				}
 				
 				if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Hint", &camera, font, 0.06) && handle_mouse {
-					board.generate_hint();
+					board.generate_hint(&assets);
 				}
 				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Exit", &camera, font, 0.06) && handle_mouse {
+					assets.play_sound(BACKWARD);
 					ret = Some(State::ExitConfirmation(Box::new(self.clone())));
 				}
 			}
@@ -289,10 +307,11 @@ impl State {
 				
 				if handle_mouse {
 					if button(&Rect { x: 0.0, y: -0.15, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Hint", &camera, font, 0.06) && handle_mouse {
-						board.generate_hint();
+						board.generate_hint(&assets);
 					}
 					if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Exit", &camera, font, 0.06) && handle_mouse {
 						ret = Some(State::ExitConfirmation(Box::new(State::Learn(board.clone()))));
+						assets.play_sound(BACKWARD);
 					}
 				
 					if board.is_won {
@@ -347,6 +366,7 @@ impl State {
 				board.draw(&assets);
 				
 				if button(&Rect { x: 0.8, y: -0.15, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Exit", &camera, font, 0.06) && handle_mouse && get_time() as f32 > *start_time {
+					assets.play_sound(BACKWARD);
 					ret = Some(State::ExitConfirmation(Box::new(State::Serious(board.clone(), *start_time, *finished_time))))
 				}
 
@@ -383,9 +403,11 @@ impl State {
 				
 				if button(&Rect { x: 0.25, y: 0.55, w: 0.2, h: 0.1 }, PRI_BUTTON_COL, "Yes", &cam, font, 0.07) {
 					ret = Some(State::MainMenu);
+					assets.play_sound(BACKWARD);
 				}
 				if button(&Rect { x: 0.55, y: 0.55, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "No", &cam, font, 0.07) {
 					ret = Some((**inner_state).clone());
+					assets.play_sound(FORWARD);
 				}
 			}
 			Self::EndScreen(inner_state, highscore) => {
@@ -430,6 +452,7 @@ impl State {
 				}
 				
 				if button(&Rect { x: 0.25, y: 0.6, w: 0.5, h: 0.1 }, PRI_BUTTON_COL, "Play Again", &cam, font, 0.07) {
+					assets.play_sound(FORWARD);
 					match &**inner_state {
 						State::Serious(b, _, _) => {
 							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32 + 1.5, None));
@@ -444,6 +467,7 @@ impl State {
 					}
 				}
 				if button(&Rect { x: 0.25, y: 0.75, w: 0.5, h: 0.1 }, SEC_BUTTON_COL, "Back", &cam, font, 0.07) {
+					assets.play_sound(BACKWARD);
 					ret = Some(State::MainMenu);
 				}
 			}
@@ -454,6 +478,7 @@ impl State {
 				set_camera(&camera);
 
 				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Back", &camera, font, 0.06) {
+					assets.play_sound(BACKWARD);
 					ret = Some(State::MainMenu);
 				}
 
@@ -483,10 +508,12 @@ impl State {
 				set_camera(&camera);
 
 				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Back", &camera, font, 0.06) {
+					assets.play_sound(BACKWARD);
 					ret = Some(State::MainMenu);
 					assets.persistance.save();
 				}
 				if button(&Rect { x: 0.0, y: -0.1, w: 0.2, h: 0.1 }, PRI_BUTTON_COL, "Reset", &camera, font, 0.06) {
+					assets.play_sound(FORWARD);
 					assets.persistance.color0 = DARKGRAY.into();
 					assets.persistance.color1 = Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into();
 					assets.persistance.color2 = Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into();
