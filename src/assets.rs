@@ -12,6 +12,7 @@ use crate::{MUSIC, SFX, SFX_VOLUMES, MUSIC_LENGTHS};
 pub struct Assets {
 	pub font: Font,
 	pub gradient: Texture2D,
+	pub lock: Texture2D,
 	pub persistance: Persistance,
 	pub materials: Vec<Material>,
 	pub material: usize,
@@ -70,6 +71,7 @@ impl Assets {
 		Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
+			lock: Texture2D::from_file_with_format(crate::LOCK, None),
 			persistance,
 			material: rand::gen_range(0, materials.len()),
 			materials,

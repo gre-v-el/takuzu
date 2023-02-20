@@ -263,10 +263,18 @@ impl Board {
 			for y in 0..self.size {
 				for x in 0..self.size {
 					if self.map[y][x].is_locked() {
-						let col = Color { r: 0.0, g: 0.0, b: 0.0, a: 0.5 - 0.5*(2.0*PI*passed).cos() };
+						let col = Color { r: 1.0, g: 1.0, b: 1.0, a: 0.5 - 0.5*(2.0*PI*passed).cos() };
 						let x = x as f32 / self.size as f32;
 						let y = y as f32 / self.size as f32;
-						draw_circle(x + w*0.5, y + w*0.5, w*0.2, col);
+						// draw_circle(x + w*0.5, y + w*0.5, w*0.2, col);
+						draw_texture_ex(assets.lock, x+m, y+m, col, DrawTextureParams { 
+							dest_size: Some(vec2(w-2.0*m, w-2.0*m)), 
+							source: None, 
+							rotation: 0.0, 
+							flip_x: false, 
+							flip_y: false, 
+							pivot: None 
+						});
 					}
 				}
 			}

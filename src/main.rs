@@ -9,11 +9,10 @@ use takuzu::{state::State, assets::Assets};
 		add generating board screen (when the generation lasts more than 3 seconds, add confirmation (if it's serious))
 		tutorial
 		difficulty choice (how many tiles)
-		show locked more intuitively
 
 		some info (what's the difference between modes, what are the rules)
 
-		make music loop
+		attribution
 		load music async
 		logo
 */
