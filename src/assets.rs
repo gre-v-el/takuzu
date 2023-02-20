@@ -61,8 +61,10 @@ impl Assets {
 			}
 		}
 
-		let music: Vec<Sound> = MUSIC.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
-		let sfx: Vec<Sound> = SFX.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
+		let music: Vec<_> = MUSIC.iter().map(|b| load_sound_from_bytes(b)).collect();
+		let music: Vec<Sound> = music.into_iter().map(|m| (m.block_on().unwrap())).collect();
+		let sfx: Vec<_> = SFX.iter().map(|b| load_sound_from_bytes(b)).collect();
+		let sfx: Vec<Sound> = sfx.into_iter().map(|s| s.block_on().unwrap()).collect();
 
 		let index = rand::gen_range(0, music.len());
 		play_sound_once(music[index]);
