@@ -21,6 +21,7 @@ pub enum State {
 	Highscores,
 	Settings(Board),
 	DifficultyChoice(Board, NextState, usize), 
+	Attribution,
 }
 
 impl State {
@@ -80,6 +81,10 @@ impl State {
 					}; 
 					ret = Some(State::Settings(board));
 					assets.play_sound(FORWARD);
+				}
+
+				if button(&Rect { x: 0.76, y: 0.9, w: 0.21, h: 0.07 }, SEC_BUTTON_COL, "Attribution", &cam, font, 0.03) {
+					ret = Some(Self::Attribution);
 				}
 			}
 			Self::DifficultyChoice(board, next, size) => {
@@ -545,6 +550,23 @@ impl State {
 				slider(&mut assets.persistance.color2[2], 0.0, 1.0, vec2(0.75, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
 
 
+			}
+			Self::Attribution => {
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Back", &camera, font, 0.06) {
+					assets.play_sound(BACKWARD);
+					ret = Some(State::MainMenu);
+					assets.persistance.save();
+				}
+
+				draw_centered_text(vec2(0.5, 0.2), "Programming by gremble", font, 0.07);
+				draw_centered_text(vec2(0.5, 0.4), "Backgrounds by vivavolt and", font, 0.07);
+				draw_centered_text(vec2(0.5, 0.5), "mrange on shadertoy.com", font, 0.07);
+				draw_centered_text(vec2(0.5, 0.7), "Music by FASSounds, AlexiAction", font, 0.07);
+				draw_centered_text(vec2(0.5, 0.8), "and SoulProdMusic on pixabay.com", font, 0.07);
 			}
 		}
 		

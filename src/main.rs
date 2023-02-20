@@ -12,8 +12,6 @@ use takuzu::{state::State, assets::Assets};
 
 		some info (what's the difference between modes, what are the rules)
 
-		attribution
-		load music async
 		logo
 */
 
