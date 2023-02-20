@@ -2,10 +2,10 @@ use std::{fs::{File, self}, io::{Read, Write}};
 use pollster::FutureExt;
 
 // use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{Color, Material, load_material, MaterialParams, UniformType, DARKGRAY}, rand, time::get_time, window::{screen_width, screen_height}};
-use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams}};
+use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams, set_sound_volume, play_sound_once}};
 use nanoserde::{DeBin, SerBin};
 
-use crate::{MUSIC, SFX, SFX_VOLUMES};
+use crate::{MUSIC, SFX, SFX_VOLUMES, MUSIC_LENGTHS};
 
 
 #[derive(Clone)]
@@ -17,11 +17,13 @@ pub struct Assets {
 	pub material: usize,
 	pub secondary_material: Option<(usize, f32)>, // id, time
 	pub music: Vec<Sound>,
+	pub next_music_play: f32,
 	pub sfx: Vec<Sound>,
 }
 
 impl Assets {
 	pub fn get() -> Self {
+		let persistance = Persistance::load();
 		let mut materials = Vec::new();
 		let paths = fs::read_dir("src/shaders").unwrap();
 
@@ -61,22 +63,40 @@ impl Assets {
 		let music: Vec<Sound> = MUSIC.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
 		let sfx: Vec<Sound> = SFX.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
 
-		play_sound(music[0], PlaySoundParams { looped: false, volume: 1.0 });
+		let index = rand::gen_range(0, music.len());
+		play_sound_once(music[index]);
+		set_sound_volume(music[index], persistance.master_volume);
 
 		Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
-			persistance: Persistance::load(),
+			persistance,
 			material: rand::gen_range(0, materials.len()),
 			materials,
 			secondary_material: None,
 			music,
 			sfx,
+			next_music_play: MUSIC_LENGTHS[index],
+		}
+	}
+
+	pub fn try_play_music(&mut self) {
+		if get_time() as f32 > self.next_music_play {
+			let index = rand::gen_range(0, self.music.len());
+			play_sound_once(self.music[index]);
+			set_sound_volume(self.music[index], self.persistance.master_volume);
+			self.next_music_play = get_time() as f32 + MUSIC_LENGTHS[index];
 		}
 	}
 
 	pub fn play_sound(&self, id: usize) {
-		play_sound(self.sfx[id], PlaySoundParams { looped: false, volume: SFX_VOLUMES[id] });
+		play_sound(self.sfx[id], PlaySoundParams { looped: false, volume: SFX_VOLUMES[id] * self.persistance.master_volume });
+	}
+
+	pub fn update_volume(&mut self) {
+		for m in self.music.iter_mut() {
+			set_sound_volume(*m, self.persistance.master_volume);
+		}
 	}
 
 	pub fn material(&self) -> &Material {
@@ -129,6 +149,7 @@ pub struct Persistance {
 	pub color1: [f32; 4],
 	pub color2: [f32; 4],
 	pub game_size: usize,
+	pub master_volume: f32,
 }
 
 impl Persistance {
@@ -159,7 +180,17 @@ impl Persistance {
 			Ok(f) => {
 				let mut vec = Vec::new();
 				f.read_to_end(&mut vec).unwrap();
-				Self::deserialize_bin(&vec).unwrap()
+				match Self::deserialize_bin(&vec) {
+					Ok(data) => data,
+					Err(_) => Persistance {
+						highscores: [None; 10],
+						color0: DARKGRAY.into(),
+						color1: Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into(),
+						color2: Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into(),
+						game_size: 4,
+						master_volume: 1.0,
+					}
+				}
 			},
 			Err(_) => {
 				Persistance {
@@ -168,6 +199,7 @@ impl Persistance {
 					color1: Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into(),
 					color2: Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into(),
 					game_size: 4,
+					master_volume: 1.0,
 				}
 			}
 		}

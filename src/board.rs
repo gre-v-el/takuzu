@@ -288,7 +288,7 @@ impl Board {
 		}
 	}
 
-	pub fn draw_errors(&mut self, assets: &Assets) {
+	pub fn draw_errors(&mut self, assets: Option<&Assets>) {
 		if let Some(e) = self.error[0] {
 			self.draw_error(&e, assets);
 		}
@@ -302,7 +302,7 @@ impl Board {
 		1.0-((5.0*t).cos() * 0.5 + 0.5)
 	}
 
-	fn draw_error(&mut self, e: &(usize, usize, usize, usize), assets: &Assets) {
+	fn draw_error(&mut self, e: &(usize, usize, usize, usize), assets: Option<&Assets>) {
 		let m = 0.05 / self.size as f32;
 		let b = 0.13 / self.size as f32;
 		let alpha = self.get_error_alpha();
@@ -315,9 +315,11 @@ impl Board {
 			Color { r: 1.0, g: 0.0, b: 0.0, a: alpha }
 		);
 
-		if alpha > 0.3 && get_time() as f32 - self.last_error_sound > 1.0 {
-			self.last_error_sound = get_time() as f32;
-			assets.play_sound(ERROR);
+		if let Some(assets) = assets {
+			if alpha > 0.3 && get_time() as f32 - self.last_error_sound > 1.0 {
+				self.last_error_sound = get_time() as f32;
+				assets.play_sound(ERROR);
+			}
 		}
 	}
 

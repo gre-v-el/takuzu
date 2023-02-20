@@ -13,7 +13,8 @@ use takuzu::{state::State, assets::Assets};
 
 		some info (what's the difference between modes, what are the rules)
 
-		sound design and music
+		make music loop
+		load music async
 		logo
 */
 
@@ -36,6 +37,7 @@ async fn main() {
 
     loop {
 		assets.draw_material();
+		assets.try_play_music();
 		
 		if let Some(s) = state.update(&mut assets, true) {
 			state = s;

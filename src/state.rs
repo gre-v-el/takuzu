@@ -166,7 +166,7 @@ impl State {
 				if handle_mouse {
 					board.handle_mouse(&camera, &assets);
 				}
-				board.draw_errors(&assets);
+				board.draw_errors(Some(&assets));
 				board.draw_hint();
 				board.draw(&assets);
 				
@@ -301,7 +301,7 @@ impl State {
 				if handle_mouse {
 					board.handle_mouse(&camera, &assets);
 				}				
-				board.draw_errors(&assets);
+				board.draw_errors(Some(&assets));
 				board.draw_hint();
 				board.draw(&assets);
 				
@@ -503,7 +503,7 @@ impl State {
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
 
-				board.draw_errors(&assets);
+				board.draw_errors(None);
 				board.draw_hint();
 				board.draw(assets);
 
@@ -524,17 +524,25 @@ impl State {
 					assets.persistance.color2 = Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into();
 				}
 
-				slider(&mut assets.persistance.color0[0], 0.0, 1.0, vec2(-0.05, 0.1), 0.3, color_u8!(255, 0, 0, 255), &camera);
-				slider(&mut assets.persistance.color0[1], 0.0, 1.0, vec2(-0.05, 0.2), 0.3, color_u8!(0, 255, 0, 255), &camera);
-				slider(&mut assets.persistance.color0[2], 0.0, 1.0, vec2(-0.05, 0.3), 0.3, color_u8!(0, 0, 255, 255), &camera);
+				let mut v = assets.persistance.master_volume;
+				slider(&mut v, 0.0, 2.0, vec2(-0.05, 0.15), 0.55, SLIDER_COL, &camera);
+				draw_centered_text(vec2(0.225, 0.07), "Master Volume", font, 0.07);
+				if v != assets.persistance.master_volume {
+					assets.persistance.master_volume = v;
+					assets.update_volume();
+				}
 
-				slider(&mut assets.persistance.color1[0], 0.0, 1.0, vec2(0.35, 0.1), 0.3, color_u8!(255, 0, 0, 255), &camera);
-				slider(&mut assets.persistance.color1[1], 0.0, 1.0, vec2(0.35, 0.2), 0.3, color_u8!(0, 255, 0, 255), &camera);
-				slider(&mut assets.persistance.color1[2], 0.0, 1.0, vec2(0.35, 0.3), 0.3, color_u8!(0, 0, 255, 255), &camera);
+				slider(&mut assets.persistance.color0[0], 0.0, 1.0, vec2(-0.05, 0.25), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color0[1], 0.0, 1.0, vec2(-0.05, 0.35), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color0[2], 0.0, 1.0, vec2(-0.05, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
 
-				slider(&mut assets.persistance.color2[0], 0.0, 1.0, vec2(0.75, 0.1), 0.3, color_u8!(255, 0, 0, 255), &camera);
-				slider(&mut assets.persistance.color2[1], 0.0, 1.0, vec2(0.75, 0.2), 0.3, color_u8!(0, 255, 0, 255), &camera);
-				slider(&mut assets.persistance.color2[2], 0.0, 1.0, vec2(0.75, 0.3), 0.3, color_u8!(0, 0, 255, 255), &camera);
+				slider(&mut assets.persistance.color1[0], 0.0, 1.0, vec2(0.35, 0.25), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color1[1], 0.0, 1.0, vec2(0.35, 0.35), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color1[2], 0.0, 1.0, vec2(0.35, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
+
+				slider(&mut assets.persistance.color2[0], 0.0, 1.0, vec2(0.75, 0.25), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color2[1], 0.0, 1.0, vec2(0.75, 0.35), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color2[2], 0.0, 1.0, vec2(0.75, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
 
 
 			}

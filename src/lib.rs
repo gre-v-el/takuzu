@@ -14,6 +14,8 @@ const MUSIC: [&[u8]; 4] = [
 	include_bytes!("../assets/music/lofi-study-112191.ogg"),
 	include_bytes!("../assets/music/unpacking-loop-ycle-138250.ogg"),
 ];
+const MUSIC_LENGTHS: [f32; 4] = [186.0, 145.0, 147.0, 125.0];
+
 const SFX: [&[u8]; 7] = [
 	include_bytes!("../assets/sfx/pop.ogg"),
 	include_bytes!("../assets/sfx/forward.ogg"),
@@ -24,6 +26,7 @@ const SFX: [&[u8]; 7] = [
 	include_bytes!("../assets/sfx/tick.ogg"),
 ];
 const SFX_VOLUMES: [f32; 7] = [0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+
 const POP: usize = 0;
 const FORWARD: usize = 1;
 const BACKWARD: usize = 2;
