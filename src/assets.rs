@@ -1,8 +1,11 @@
 use std::{fs::{File, self}, io::{Read, Write}};
+use pollster::FutureExt;
 
 // use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{Color, Material, load_material, MaterialParams, UniformType, DARKGRAY}, rand, time::get_time, window::{screen_width, screen_height}};
-use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}};
+use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams}};
 use nanoserde::{DeBin, SerBin};
+
+use crate::{MUSIC, SFX};
 
 
 #[derive(Clone)]
@@ -13,6 +16,9 @@ pub struct Assets {
 	pub materials: Vec<Material>,
 	pub material: usize,
 	pub secondary_material: Option<(usize, f32)>, // id, time
+	pub music: Vec<Sound>,
+	pub sfx: Vec<Sound>,
+	pub sfx_volumes: Vec<f32>,
 }
 
 impl Assets {
@@ -53,15 +59,26 @@ impl Assets {
 			}
 		}
 
+		let music: Vec<Sound> = MUSIC.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
+		let sfx: Vec<Sound> = SFX.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
+
+		play_sound(music[0], PlaySoundParams { looped: false, volume: 1.0 });
 
 		Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
 			persistance: Persistance::load(),
-			material: 0,//rand::gen_range(0, materials.len()),
+			material: rand::gen_range(0, materials.len()),
 			materials,
 			secondary_material: None,
+			music,
+			sfx,
+			sfx_volumes: vec![0.5],
 		}
+	}
+
+	pub fn play_sound(&self, id: usize) {
+		play_sound(self.sfx[id], PlaySoundParams { looped: false, volume: self.sfx_volumes[id] });
 	}
 
 	pub fn material(&self) -> &Material {

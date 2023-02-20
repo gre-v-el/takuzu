@@ -156,7 +156,7 @@ impl State {
 				}
 				
 				if handle_mouse {
-					board.handle_mouse(&camera);
+					board.handle_mouse(&camera, &assets);
 				}
 				board.draw_errors();
 				board.draw_hint();
@@ -280,7 +280,7 @@ impl State {
 				}
 				
 				if handle_mouse {
-					board.handle_mouse(&camera);
+					board.handle_mouse(&camera, &assets);
 				}				
 				board.draw_errors();
 				board.draw_hint();
@@ -342,7 +342,7 @@ impl State {
 				}
 				
 				if handle_mouse && get_time() as f32 > *start_time {
-					board.handle_mouse(&camera);
+					board.handle_mouse(&camera, &assets);
 				}
 				board.draw(&assets);
 				

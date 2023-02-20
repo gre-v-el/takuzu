@@ -48,7 +48,7 @@ impl Board {
 		board
 	}
 
-	pub fn handle_mouse(&mut self, camera: &Camera2D) {
+	pub fn handle_mouse(&mut self, camera: &Camera2D, assets: &Assets) {
 		if !is_mouse_button_pressed(MouseButton::Left) && !is_mouse_button_pressed(MouseButton::Right) {
 			return;
 		}
@@ -70,9 +70,11 @@ impl Board {
 
 		if is_mouse_button_down(MouseButton::Left) {
 			self.map[y][x] = self.map[y][x].next();
+			assets.play_sound(0);
 		}
 		else {
 			self.map[y][x] = self.map[y][x].prev();
+			assets.play_sound(0);
 		}
 
 		self.verify_board();
