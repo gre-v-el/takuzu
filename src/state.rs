@@ -4,10 +4,28 @@ use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered
 use macroquad::prelude::*;
 
 #[derive(Clone)]
-pub enum NextState {
+pub enum GameMode {
 	Sandbox,
 	Learn,
 	Serious,
+}
+
+impl GameMode {
+	pub fn as_str(&self) -> &str {
+		match self {
+			Self::Sandbox => "Sandbox",
+			Self::Learn => "Learn",
+			Self::Serious => "Serious",
+		}
+	}
+
+	pub fn info(&self) -> Vec<&str> {
+		match self {
+			Self::Sandbox => vec!["Here you can play", "around with different", "algorithms."],
+			Self::Learn =>   vec!["Here you can play", "Takuzu with hints", "and error highlighting"],
+			Self::Serious => vec!["Here you can play", "Takuzu without any", "hints or highlighting.", "Your best times will be", "saved as highscores."],
+		}
+	}
 }
 
 #[derive(Clone)]
@@ -20,8 +38,9 @@ pub enum State {
 	ExitConfirmation(Box<State>),
 	Highscores,
 	Settings(Board),
-	DifficultyChoice(Board, NextState, usize), 
+	DifficultyChoice(Board, GameMode, usize), 
 	Attribution,
+	ModeInfo(GameMode)
 }
 
 impl State {
@@ -40,20 +59,30 @@ impl State {
 				if button(&Rect{x: 0.3, y: 0.28, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SANDBOX", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
-					ret = Some(Self::DifficultyChoice(board, NextState::Sandbox, assets.persistance.game_size));
+					ret = Some(Self::DifficultyChoice(board, GameMode::Sandbox, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.39, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "LEARN", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
-					ret = Some(Self::DifficultyChoice(board, NextState::Learn, assets.persistance.game_size));
+					ret = Some(Self::DifficultyChoice(board, GameMode::Learn, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SERIOUS", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size);
 					board.generate_fraction(0.6);
-					ret = Some(Self::DifficultyChoice(board, NextState::Serious, assets.persistance.game_size));
+					ret = Some(Self::DifficultyChoice(board, GameMode::Serious, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
+				}
+				
+				if button(&Rect{x: 0.2, y: 0.29, w: 0.08, h: 0.08}, SEC_BUTTON_COL, "?", &cam, font, 0.05) && handle_mouse {
+					ret = Some(Self::ModeInfo(GameMode::Sandbox));
+				}
+				if button(&Rect{x: 0.2, y: 0.40, w: 0.08, h: 0.08}, SEC_BUTTON_COL, "?", &cam, font, 0.05) && handle_mouse {
+					ret = Some(Self::ModeInfo(GameMode::Learn));
+				}
+				if button(&Rect{x: 0.2, y: 0.51, w: 0.08, h: 0.08}, SEC_BUTTON_COL, "?", &cam, font, 0.05) && handle_mouse {
+					ret = Some(Self::ModeInfo(GameMode::Serious));
 				}
 
 				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, SEC_BUTTON_COL, "HIGHSCORES", &cam, font, 0.05) && handle_mouse {
@@ -119,9 +148,9 @@ impl State {
 					assets.persistance.save();
 					ret = Some(
 						match next {
-							NextState::Sandbox => State::Sandbox(Board::new(*size)),
-							NextState::Learn => State::Learn(Board::new_learn(*size)),
-							NextState::Serious => State::Serious(Board::new_serious(*size), get_time() as f32 + 1.5, None, 0),
+							GameMode::Sandbox => State::Sandbox(Board::new(*size)),
+							GameMode::Learn => State::Learn(Board::new_learn(*size)),
+							GameMode::Serious => State::Serious(Board::new_serious(*size), get_time() as f32 + 1.5, None, 0),
 						}
 					);
 					assets.play_sound(FORWARD);
@@ -421,7 +450,6 @@ impl State {
 				}
 			}
 			Self::EndScreen(inner_state, highscore) => {
-				// When uncommented, breaks the font
 				inner_state.update(assets, false); 
 				
 				let allocated_rect = Rect {x: 0.0, y: 0.0, w: 1.0, h: 1.0};
@@ -559,7 +587,6 @@ impl State {
 				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Back", &camera, font, 0.06) {
 					assets.play_sound(BACKWARD);
 					ret = Some(State::MainMenu);
-					assets.persistance.save();
 				}
 
 				draw_centered_text(vec2(0.5, 0.2), "Programming by gremble", font, 0.07);
@@ -567,6 +594,32 @@ impl State {
 				draw_centered_text(vec2(0.5, 0.5), "mrange on shadertoy.com", font, 0.07);
 				draw_centered_text(vec2(0.5, 0.7), "Music by FASSounds, AlexiAction", font, 0.07);
 				draw_centered_text(vec2(0.5, 0.8), "and SoulProdMusic on pixabay.com", font, 0.07);
+			}
+			Self::ModeInfo(mode) => {
+				Self::update(&mut Self::MainMenu, assets, false);
+
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
+				let camera = Camera2D::from_display_rect(display_rect);
+				set_camera(&camera);
+
+
+				draw_rectangle(display_rect.x, display_rect.y, display_rect.w, display_rect.h, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.8 });
+				
+				let m = 0.01;
+				draw_round_rect(0.0-m, 0.1-m, 1.0+2.0*m, 0.8+2.0*m, 0.05+m, POPUP_EDGE_COL);
+				draw_round_rect(0.0,   0.1,   1.0,       0.8,       0.05,   POPUP_COL);
+				
+				draw_centered_text(vec2(0.5, 0.2), mode.as_str(), font, 0.1);
+				for (i, line) in mode.info().iter().enumerate() {
+					draw_centered_text(vec2(0.5, 0.4+i as f32 * 0.1), *line, font, 0.08);
+				}
+
+
+				if button(&Rect { x: 0.8, y: -0.1, w: 0.2, h: 0.1 }, SEC_BUTTON_COL, "Back", &camera, font, 0.06) {
+					assets.play_sound(BACKWARD);
+					ret = Some(State::MainMenu);
+				}
+
 			}
 		}
 		
