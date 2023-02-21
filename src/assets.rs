@@ -1,14 +1,12 @@
-use std::{fs::{File, self}, io::{Read, Write}};
+use std::{fs::{File, self}, io::{Read, Write}, thread, sync::mpsc::{Receiver, Sender, channel}};
 use pollster::FutureExt;
 
-// use macroquad::{text::{Font, load_ttf_font_from_bytes}, texture::Texture2D, prelude::{Color, Material, load_material, MaterialParams, UniformType, DARKGRAY}, rand, time::get_time, window::{screen_width, screen_height}};
 use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams, set_sound_volume, play_sound_once}};
 use nanoserde::{DeBin, SerBin};
 
-use crate::{MUSIC, SFX, SFX_VOLUMES, MUSIC_LENGTHS};
+use crate::{MUSIC, SFX, SFX_VOLUMES, MUSIC_LENGTHS, cell_state::CellState, state::GameMode, board::Board};
 
 
-#[derive(Clone)]
 pub struct Assets {
 	pub font: Font,
 	pub gradient: Texture2D,
@@ -20,6 +18,11 @@ pub struct Assets {
 	pub music: Vec<Sound>,
 	pub next_music_play: f32,
 	pub sfx: Vec<Sound>,
+
+	pub receiver: Receiver<Vec<Vec<CellState>>>,
+	pub sender: Sender<(usize, GameMode)>,
+
+	pub next_board_id: usize,
 }
 
 impl Assets {
@@ -68,6 +71,24 @@ impl Assets {
 		play_sound_once(music[index]);
 		set_sound_volume(music[index], persistance.master_volume);
 
+
+		// map, board_id
+		let (map_sender, map_receiver) = channel::<(Vec<Vec<CellState>>, usize)>();
+
+		// map_size, game_mode, board_id
+		let (order_sender, order_receiver) = channel::<(usize, GameMode, usize)>();
+		thread::spawn(move || {
+			loop {
+				let (size, mode, id) = order_receiver.recv().unwrap();
+				let board = match mode {
+					GameMode::Sandbox => Board::new(size, 0),
+					GameMode::Learn => Board::new_learn(size, 0),
+					GameMode::Serious => Board::new_serious(size, 0),
+				};
+				map_sender.send((board.map, id)).unwrap();
+			}
+		});
+
 		Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
@@ -79,6 +100,9 @@ impl Assets {
 			music,
 			sfx,
 			next_music_play: MUSIC_LENGTHS[index],
+			sender: order_sender,
+			receiver: map_receiver,
+			next_board_id: 1,
 		}
 	}
 

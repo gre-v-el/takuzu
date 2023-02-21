@@ -10,8 +10,6 @@ use takuzu::{state::State, assets::Assets};
 		tutorial
 		difficulty choice (how many tiles)
 
-		some info (what's the difference between modes, what are the rules)
-
 		logo
 */
 

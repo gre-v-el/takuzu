@@ -57,19 +57,19 @@ impl State {
 				
 				
 				if button(&Rect{x: 0.3, y: 0.28, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SANDBOX", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(assets.persistance.game_size);
+					let mut board = Board::new(assets.persistance.game_size, 0);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, GameMode::Sandbox, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.39, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "LEARN", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(assets.persistance.game_size);
+					let mut board = Board::new(assets.persistance.game_size, 0);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, GameMode::Learn, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SERIOUS", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(assets.persistance.game_size);
+					let mut board = Board::new(assets.persistance.game_size, 0);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, GameMode::Serious, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
@@ -93,6 +93,7 @@ impl State {
 				if button(&Rect{x: 0.3, y: 0.81, w: 0.4, h: 0.1}, SEC_BUTTON_COL, "SETTINGS", &cam, font, 0.05) && handle_mouse {
 					use crate::cell_state::CellState::*;
 					let board = Board { 
+						id: 0,
 						is_won: false, 
 						is_valid: true, 
 						size: 4, 
@@ -139,18 +140,20 @@ impl State {
 				draw_centered_text(vec2(0.5, 0.8), format!("{size}").as_str(), font, 0.1);
 
 				if old_size != *size {
-					*board = Board::new(*size);
+					*board = Board::new(*size, 0);
 					board.generate_fraction(0.6);
 				}
 
 				if button(&Rect{x: 0.35, y: 0.95, w: 0.3, h: 0.1}, PRI_BUTTON_COL, "PLAY", &camera, font, 0.08) {
 					assets.persistance.game_size = *size;
 					assets.persistance.save();
+					let id = assets.next_board_id;
+					assets.next_board_id += 1;
 					ret = Some(
 						match next {
-							GameMode::Sandbox => State::Sandbox(Board::new(*size)),
-							GameMode::Learn => State::Learn(Board::new_learn(*size)),
-							GameMode::Serious => State::Serious(Board::new_serious(*size), get_time() as f32 + 1.5, None, 0),
+							GameMode::Sandbox => State::Sandbox(Board::new(*size, id)),
+							GameMode::Learn => State::Learn(Board::new_learn(*size, id)),
+							GameMode::Serious => State::Serious(Board::new_serious(*size, id), get_time() as f32 + 1.5, None, 0),
 						}
 					);
 					assets.play_sound(FORWARD);
@@ -491,16 +494,18 @@ impl State {
 				
 				if button(&Rect { x: 0.25, y: 0.6, w: 0.5, h: 0.1 }, PRI_BUTTON_COL, "Play Again", &cam, font, 0.07) {
 					assets.play_sound(FORWARD);
+					let id = assets.next_board_id;
+					assets.next_board_id += 1;
 					match &**inner_state {
 						State::Serious(b, _, _, _) => {
-							ret = Some(State::Serious(Board::new_serious(b.size), get_time() as f32 + 1.5, None, 0));
+							ret = Some(State::Serious(Board::new_serious(b.size, id), get_time() as f32 + 1.5, None, 0));
 						}
 						State::Learn(b) => {
-							let board = Board::new_learn(b.size);
+							let board = Board::new_learn(b.size, id);
 							ret = Some(State::Learn(board));
 						}
 						_ => {
-							ret = Some(State::Learn(Board::new_learn(6)));
+							ret = Some(State::Learn(Board::new_learn(6, id)));
 						}
 					}
 				}

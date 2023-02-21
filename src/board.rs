@@ -1,10 +1,11 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI};
 
 use macroquad::prelude::*;
 use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT, ERROR};
 
 #[derive(Clone)]
 pub struct Board {
+	pub id: usize, // for determining if a board returned by the generator thred regards this exact board
 	pub is_won: bool,
 	pub is_valid: bool,
 	pub size: usize,
@@ -17,7 +18,7 @@ pub struct Board {
 }
 
 impl Board {
-	pub fn new(size: usize) -> Self {
+	pub fn new(size: usize, id: usize) -> Self {
 		let s = Self {
 			is_won: false,
 			is_valid: true,
@@ -28,13 +29,14 @@ impl Board {
 			hint: None,
 			show_locked: None,
 			last_error_sound: -1.0,
+			id: id,
 		};
 
 		s
 	}
 
-	pub fn new_learn(size: usize) -> Self {
-		let mut board = Board::new(size);
+	pub fn new_learn(size: usize, id: usize) -> Self {
+		let mut board = Board::new(size, id);
 		board.generate_valid();
 		board.degenerate();
 		board.purge_redundancies();
@@ -42,8 +44,8 @@ impl Board {
 		board
 	}
 
-	pub fn new_serious(size: usize) -> Self {
-		let mut board = Board::new(size);
+	pub fn new_serious(size: usize, id: usize) -> Self {
+		let mut board = Board::new(size, id);
 		board.generate_valid();
 		board.purge_redundancies();
 		board.lock_tiles();
@@ -107,6 +109,7 @@ impl Board {
 	}
 
 	pub fn generate_hint(&mut self, assets: &Assets) {
+
 		let mut vec = Vec::new();
 		let mut clone = self.clone();
 		
