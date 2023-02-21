@@ -1,7 +1,7 @@
 use std::{f32::consts::PI};
 
 use macroquad::prelude::*;
-use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT, ERROR, col_lerp};
+use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT, ERROR, col_lerp, generation_animation_cell_col};
 
 #[derive(Clone)]
 pub struct Board {
@@ -9,6 +9,7 @@ pub struct Board {
 	pub is_won: bool,
 	pub is_valid: bool,
 	pub is_generating: bool,
+	pub generation_time: f32,
 	pub size: usize,
 	pub map: Vec<Vec<CellState>>,
 	pub error: [Option<(usize, usize, usize, usize)>; 2], // up to two regions on the board
@@ -32,6 +33,7 @@ impl Board {
 			show_locked: None,
 			last_error_sound: -1.0,
 			id: id,
+			generation_time: -1.0,
 		};
 
 		s
@@ -254,14 +256,17 @@ impl Board {
 			for (x, cell) in row.iter().enumerate() {
 				let color = 
 					if self.is_generating {
-						let angle = (y as f32 - self.size as f32 / 2.0).atan2(x as f32 - self.size as f32 / 2.0);
-						let col = (angle / 2.0 / PI + get_time() as f32 * 0.3) % 1.0;
-
-						let col = col_lerp(assets.persistance.color2.into(), assets.persistance.color1.into(), col);
-
-						col
+						generation_animation_cell_col(x as f32, y as f32, self.size as f32, assets)
 					} 
-					else {cell.col(assets)};
+					else if get_time() as f32 - self.generation_time > 1.0 {
+						cell.col(assets)
+					}
+					else {
+						let a = generation_animation_cell_col(x as f32, y as f32, self.size as f32, &assets);
+						let b = cell.col(assets);
+						let t = get_time() as f32 - self.generation_time;
+						col_lerp(a, b, t)
+					};
 				let x = x as f32 / self.size as f32;
 				let y = y as f32 / self.size as f32;
 				draw_round_rect(x + m, y + m, w - 2.0*m, w - 2.0*m, b, color);

@@ -11,10 +11,10 @@ use takuzu::{state::State, assets::Assets};
 
 		logo
 
-		music/sfx volume
+		music/sfx volume + settings relayout
 		sandbox lock/unlock
 		zoom :weary:
-		
+
 		sandbox algorithms multithreading
 */
 

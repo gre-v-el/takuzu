@@ -108,6 +108,7 @@ impl State {
 						hint: Some((2, 3)),
 						show_locked: Option::None,
 						last_error_sound: -1.0,
+						generation_time: -1.0,
 						is_generating: false,
 					}; 
 					ret = Some(State::Settings(board));
@@ -648,12 +649,14 @@ impl State {
 				if board.id != id || board.size != map_size || !board.is_generating { return; }
 				board.map = map;
 				board.is_generating = false;
+				board.generation_time = get_time() as f32;
 			}
 			Self::Serious(board, start, _, _) => {
 				if board.id != id || board.size != map_size || !board.is_generating { return; }
 				board.map = map;
 				board.is_generating = false;
 				*start = get_time() as f32 + 1.5;
+				board.generation_time = get_time() as f32;
 			}
 			_ => {}
 		}

@@ -1,4 +1,7 @@
-use macroquad::prelude::Color;
+use std::f32::consts::PI;
+
+use assets::Assets;
+use macroquad::{prelude::Color, time::get_time};
 
 pub mod board;
 pub mod cell_state;
@@ -56,4 +59,14 @@ pub fn col_lerp(a: Color, b: Color, t: f32) -> Color {
 		b: lerp(a.b, b.b, t), 
 		a: lerp(a.a, b.a, t) 
 	}
+}
+
+pub fn generation_animation_cell_col(x: f32, y: f32, size: f32, assets: &Assets) -> Color {
+	let angle = (y - size / 2.0).atan2(x - size / 2.0);
+	let col = (angle / 2.0 / PI + get_time() as f32 * 0.3) % 1.0;
+
+	let mut col = col_lerp(assets.persistance.color2.into(), assets.persistance.color1.into(), col);
+	col.a = 0.1;
+
+	col
 }
