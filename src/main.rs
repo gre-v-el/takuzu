@@ -6,7 +6,6 @@ use takuzu::{state::State, assets::Assets};
 	TODO:
 		improve solving with the last rule
 
-		add generating board screen (when the generation lasts more than 3 seconds, add confirmation (if it's serious))
 		tutorial
 		difficulty choice (how many tiles)
 
@@ -15,10 +14,8 @@ use takuzu::{state::State, assets::Assets};
 		music/sfx volume
 		sandbox lock/unlock
 		zoom :weary:
-
-		no countdown in serious mode when waiting for generation
-
-		load music on a separate thread
+		
+		sandbox algorithms multithreading
 */
 
 fn window_config() -> Conf {

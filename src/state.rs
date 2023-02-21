@@ -395,7 +395,7 @@ impl State {
 					let (is_highscore, prev_time) = assets.persistance.insert_highscore(board.size, time);
 					ret = Some(State::EndScreen(Box::new(State::Serious(board.clone(), *start_time, Some(time), *sounds)), if is_highscore {Some((time, prev_time))} else {None}));
 				}
-				if get_time() as f32 > *start_time {
+				if get_time() as f32 > *start_time && !board.is_generating {
 					let passed = if let Some(t) = *finished_time {t} else {get_time() as f32 - *start_time};
 					let mut str = format!("0{:.2}s", passed);
 					if passed >= 10.0 {str = str[1..].to_owned();}
@@ -415,7 +415,7 @@ impl State {
 					ret = Some(State::ExitConfirmation(Box::new(State::Serious(board.clone(), *start_time, *finished_time, *sounds))))
 				}
 
-				if *start_time > get_time() as f32 {
+				if *start_time > get_time() as f32 && !board.is_generating {
 					let countdown = ((*start_time - get_time() as f32) / 1.5 * 4.0).floor();
 					let t = 1.0 - ((*start_time - get_time() as f32) / 1.5 * 4.0).fract();
 					draw_rectangle(display_rect.x, display_rect.y, display_rect.w, display_rect.h, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.8 });
@@ -649,10 +649,11 @@ impl State {
 				board.map = map;
 				board.is_generating = false;
 			}
-			Self::Serious(board, _, _, _) => {
+			Self::Serious(board, start, _, _) => {
 				if board.id != id || board.size != map_size || !board.is_generating { return; }
 				board.map = map;
 				board.is_generating = false;
+				*start = get_time() as f32 + 1.5;
 			}
 			_ => {}
 		}

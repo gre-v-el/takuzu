@@ -124,9 +124,9 @@ impl Assets {
 		}
 		else {
 			if let Ok((music, sfx)) = self.assets_receiver.try_recv() {
-				let index = rand::gen_range(0, music.len());
-				play_sound_once(music[index]);
-				set_sound_volume(music[index], self.persistance.master_volume);
+				// let index = rand::gen_range(0, music.len());
+				// play_sound_once(music[index]);
+				// set_sound_volume(music[index], self.persistance.master_volume);
 
 				self.music = Some(music);
 				self.sfx = Some(sfx);
