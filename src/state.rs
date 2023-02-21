@@ -57,19 +57,19 @@ impl State {
 				
 				
 				if button(&Rect{x: 0.3, y: 0.28, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SANDBOX", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(assets.persistance.game_size, 0);
+					let mut board = Board::new(assets.persistance.game_size, 0, false);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, GameMode::Sandbox, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.39, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "LEARN", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(assets.persistance.game_size, 0);
+					let mut board = Board::new(assets.persistance.game_size, 0, false);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, GameMode::Learn, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.3, y: 0.5, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SERIOUS", &cam, font, 0.06) && handle_mouse {
-					let mut board = Board::new(assets.persistance.game_size, 0);
+					let mut board = Board::new(assets.persistance.game_size, 0, false);
 					board.generate_fraction(0.6);
 					ret = Some(Self::DifficultyChoice(board, GameMode::Serious, assets.persistance.game_size));
 					assets.play_sound(FORWARD);
@@ -108,6 +108,7 @@ impl State {
 						hint: Some((2, 3)),
 						show_locked: Option::None,
 						last_error_sound: -1.0,
+						is_generating: false,
 					}; 
 					ret = Some(State::Settings(board));
 					assets.play_sound(FORWARD);
@@ -140,7 +141,7 @@ impl State {
 				draw_centered_text(vec2(0.5, 0.8), format!("{size}").as_str(), font, 0.1);
 
 				if old_size != *size {
-					*board = Board::new(*size, 0);
+					*board = Board::new(*size, 0, false);
 					board.generate_fraction(0.6);
 				}
 
@@ -151,7 +152,7 @@ impl State {
 					assets.next_board_id += 1;
 					ret = Some(
 						match next {
-							GameMode::Sandbox => State::Sandbox(Board::new(*size, id)),
+							GameMode::Sandbox => State::Sandbox(Board::new(*size, id, false)),
 							GameMode::Learn => State::Learn(Board::new_learn(*size, id)),
 							GameMode::Serious => State::Serious(Board::new_serious(*size, id), get_time() as f32 + 1.5, None, 0),
 						}

@@ -19,8 +19,8 @@ pub struct Assets {
 	pub next_music_play: f32,
 	pub sfx: Vec<Sound>,
 
-	pub receiver: Receiver<Vec<Vec<CellState>>>,
-	pub sender: Sender<(usize, GameMode)>,
+	pub receiver: Receiver<(Vec<Vec<CellState>>, usize)>,
+	pub sender: Sender<(usize, GameMode, usize)>,
 
 	pub next_board_id: usize,
 }
@@ -77,11 +77,12 @@ impl Assets {
 
 		// map_size, game_mode, board_id
 		let (order_sender, order_receiver) = channel::<(usize, GameMode, usize)>();
+
 		thread::spawn(move || {
 			loop {
 				let (size, mode, id) = order_receiver.recv().unwrap();
 				let board = match mode {
-					GameMode::Sandbox => Board::new(size, 0),
+					GameMode::Sandbox => Board::new(size, 0, false),
 					GameMode::Learn => Board::new_learn(size, 0),
 					GameMode::Serious => Board::new_serious(size, 0),
 				};

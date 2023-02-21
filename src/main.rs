@@ -11,6 +11,15 @@ use takuzu::{state::State, assets::Assets};
 		difficulty choice (how many tiles)
 
 		logo
+
+		music/scf volume
+		sandbox lock/unlock
+		zoom :weary:
+
+
+		// new_learn/new_serious -> new + assets.sender
+
+		load music on a separate thread
 */
 
 fn window_config() -> Conf {

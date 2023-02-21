@@ -8,6 +8,7 @@ pub struct Board {
 	pub id: usize, // for determining if a board returned by the generator thred regards this exact board
 	pub is_won: bool,
 	pub is_valid: bool,
+	pub is_generating: bool,
 	pub size: usize,
 	pub map: Vec<Vec<CellState>>,
 	pub error: [Option<(usize, usize, usize, usize)>; 2], // up to two regions on the board
@@ -18,10 +19,11 @@ pub struct Board {
 }
 
 impl Board {
-	pub fn new(size: usize, id: usize) -> Self {
+	pub fn new(size: usize, id: usize, will_generate: bool) -> Self {
 		let s = Self {
 			is_won: false,
 			is_valid: true,
+			is_generating: will_generate,
 			size,
 			map: vec![vec![CellState::None; size]; size],
 			error: [None; 2],
@@ -36,7 +38,7 @@ impl Board {
 	}
 
 	pub fn new_learn(size: usize, id: usize) -> Self {
-		let mut board = Board::new(size, id);
+		let mut board = Board::new(size, id, true);
 		board.generate_valid();
 		board.degenerate();
 		board.purge_redundancies();
@@ -45,7 +47,7 @@ impl Board {
 	}
 
 	pub fn new_serious(size: usize, id: usize) -> Self {
-		let mut board = Board::new(size, id);
+		let mut board = Board::new(size, id, true);
 		board.generate_valid();
 		board.purge_redundancies();
 		board.lock_tiles();
