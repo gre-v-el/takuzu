@@ -17,7 +17,7 @@ use takuzu::{state::State, assets::Assets};
 		zoom :weary:
 
 
-		// new_learn/new_serious -> new + assets.sender
+		no countdown in serious mode when waiting for generation
 
 		load music on a separate thread
 */
@@ -45,6 +45,10 @@ async fn main() {
 		
 		if let Some(s) = state.update(&mut assets, true) {
 			state = s;
+		}
+
+		if let Ok((map, id)) = assets.receiver.try_recv() {
+			state.capture_generated_map(map.len(), map, id);
 		}
 
         next_frame().await

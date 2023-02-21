@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, assets::Assets, PRI_BUTTON_COL, SEC_BUTTON_COL, SLIDER_COL, POPUP_COL, POPUP_EDGE_COL, FORWARD, BACKWARD, TICK};
+use crate::{board::Board, ui::{rect_circumscribed_on_rect, button, draw_centered_text_stable, draw_round_rect, draw_centered_text, draw_centered_text_color, slider}, assets::Assets, PRI_BUTTON_COL, SEC_BUTTON_COL, SLIDER_COL, POPUP_COL, POPUP_EDGE_COL, FORWARD, BACKWARD, TICK, cell_state::CellState};
 use macroquad::prelude::*;
 
 #[derive(Clone)]
@@ -153,8 +153,14 @@ impl State {
 					ret = Some(
 						match next {
 							GameMode::Sandbox => State::Sandbox(Board::new(*size, id, false)),
-							GameMode::Learn => State::Learn(Board::new_learn(*size, id)),
-							GameMode::Serious => State::Serious(Board::new_serious(*size, id), get_time() as f32 + 1.5, None, 0),
+							GameMode::Learn => {
+								assets.sender.send((*size, GameMode::Learn, id)).unwrap();
+								State::Learn(Board::new(*size, id, true))
+							},
+							GameMode::Serious => {
+								assets.sender.send((*size, GameMode::Serious, id)).unwrap();
+								State::Serious(Board::new(*size, id, true), get_time() as f32 + 1.5, None, 0)
+							}
 						}
 					);
 					assets.play_sound(FORWARD);
@@ -499,14 +505,16 @@ impl State {
 					assets.next_board_id += 1;
 					match &**inner_state {
 						State::Serious(b, _, _, _) => {
-							ret = Some(State::Serious(Board::new_serious(b.size, id), get_time() as f32 + 1.5, None, 0));
+							assets.sender.send((b.size, GameMode::Serious, id)).unwrap();
+							ret = Some(State::Serious(Board::new(b.size, id, true), get_time() as f32 + 1.5, None, 0));
 						}
 						State::Learn(b) => {
-							let board = Board::new_learn(b.size, id);
+							assets.sender.send((b.size, GameMode::Learn, id)).unwrap();
+							let board = Board::new(b.size, id, true);
 							ret = Some(State::Learn(board));
 						}
 						_ => {
-							ret = Some(State::Learn(Board::new_learn(6, id)));
+							ret = Some(State::Learn(Board::new(6, id, true)));
 						}
 					}
 				}
@@ -582,8 +590,6 @@ impl State {
 				slider(&mut assets.persistance.color2[0], 0.0, 1.0, vec2(0.75, 0.25), 0.3, color_u8!(255, 0, 0, 255), &camera);
 				slider(&mut assets.persistance.color2[1], 0.0, 1.0, vec2(0.75, 0.35), 0.3, color_u8!(0, 255, 0, 255), &camera);
 				slider(&mut assets.persistance.color2[2], 0.0, 1.0, vec2(0.75, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
-
-
 			}
 			Self::Attribution => {
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());
@@ -634,5 +640,21 @@ impl State {
 		}
 
 		ret
+	}
+
+	pub fn capture_generated_map(&mut self, map_size: usize, map: Vec<Vec<CellState>>, id: usize) {
+		match self {
+			Self::Learn(board) => {
+				if board.id != id || board.size != map_size || !board.is_generating { return; }
+				board.map = map;
+				board.is_generating = false;
+			}
+			Self::Serious(board, _, _, _) => {
+				if board.id != id || board.size != map_size || !board.is_generating { return; }
+				board.map = map;
+				board.is_generating = false;
+			}
+			_ => {}
+		}
 	}
 }
