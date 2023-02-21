@@ -1,7 +1,7 @@
 use std::{f32::consts::PI};
 
 use macroquad::prelude::*;
-use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT, ERROR};
+use crate::{cell_state::CellState, ui::draw_round_rect, assets::Assets, POP, LOCKED, HINT, ERROR, col_lerp};
 
 #[derive(Clone)]
 pub struct Board {
@@ -55,7 +55,7 @@ impl Board {
 	}
 
 	pub fn handle_mouse(&mut self, camera: &Camera2D, assets: &Assets) {
-		if !is_mouse_button_pressed(MouseButton::Left) && !is_mouse_button_pressed(MouseButton::Right) {
+		if !is_mouse_button_pressed(MouseButton::Left) && !is_mouse_button_pressed(MouseButton::Right) || self.is_generating {
 			return;
 		}
 
@@ -252,7 +252,16 @@ impl Board {
 		let w = 1.0 / self.size as f32;
 		for (y, row) in self.map.iter().enumerate() {
 			for (x, cell) in row.iter().enumerate() {
-				let color = cell.col(assets);
+				let color = 
+					if self.is_generating {
+						let angle = (y as f32 - self.size as f32 / 2.0).atan2(x as f32 - self.size as f32 / 2.0);
+						let col = (angle / 2.0 / PI + get_time() as f32 * 0.3) % 1.0;
+
+						let col = col_lerp(assets.persistance.color2.into(), assets.persistance.color1.into(), col);
+
+						col
+					} 
+					else {cell.col(assets)};
 				let x = x as f32 / self.size as f32;
 				let y = y as f32 / self.size as f32;
 				draw_round_rect(x + m, y + m, w - 2.0*m, w - 2.0*m, b, color);

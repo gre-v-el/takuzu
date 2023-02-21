@@ -44,3 +44,16 @@ const SLIDER_COL: Color = Color {r: 0.48, g: 0.54, b: 0.68, a: 0.7};
 
 const POPUP_EDGE_COL: Color = Color {r: 0.1, g: 0.1, b: 0.1, a: 1.0};
 const POPUP_COL: Color = Color {r: 0.3, g: 0.3, b: 0.3, a: 1.0};
+
+pub fn lerp(a: f32, b: f32, t: f32) -> f32 {
+	t * b + a * (1.0-t)
+}
+
+pub fn col_lerp(a: Color, b: Color, t: f32) -> Color {
+	Color { 
+		r: lerp(a.r, b.r, t), 
+		g: lerp(a.g, b.g, t), 
+		b: lerp(a.b, b.b, t), 
+		a: lerp(a.a, b.a, t) 
+	}
+}

@@ -15,9 +15,10 @@ pub struct Assets {
 	pub materials: Vec<Material>,
 	pub material: usize,
 	pub secondary_material: Option<(usize, f32)>, // id, time
-	pub music: Vec<Sound>,
 	pub next_music_play: f32,
-	pub sfx: Vec<Sound>,
+	pub music: Option<Vec<Sound>>, // None if not yet loaded
+	pub sfx: Option<Vec<Sound>>,
+	pub assets_receiver: Receiver<(Vec<Sound>, Vec<Sound>)>,
 
 	pub receiver: Receiver<(Vec<Vec<CellState>>, usize)>,
 	pub sender: Sender<(usize, GameMode, usize)>,
@@ -64,13 +65,6 @@ impl Assets {
 			}
 		}
 
-		let music: Vec<Sound> = MUSIC.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
-		let sfx: Vec<Sound> = SFX.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
-
-		let index = rand::gen_range(0, music.len());
-		play_sound_once(music[index]);
-		set_sound_volume(music[index], persistance.master_volume);
-
 
 		// map, board_id
 		let (map_sender, map_receiver) = channel::<(Vec<Vec<CellState>>, usize)>();
@@ -90,6 +84,17 @@ impl Assets {
 			}
 		});
 
+
+		// music, sfx
+		let (assets_sender, assets_receiver) = channel::<(Vec<Sound>, Vec<Sound>)>();
+
+		thread::spawn(move || {
+			let music: Vec<Sound> = MUSIC.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
+			let sfx: Vec<Sound> = SFX.iter().map(|b| load_sound_from_bytes(b).block_on().unwrap()).collect();
+
+			assets_sender.send((music, sfx)).unwrap();
+		});
+
 		Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
@@ -98,31 +103,49 @@ impl Assets {
 			material: rand::gen_range(0, materials.len()),
 			materials,
 			secondary_material: None,
-			music,
-			sfx,
-			next_music_play: MUSIC_LENGTHS[index],
+			music: None,
+			sfx: None,
+			next_music_play: 0.0,
 			sender: order_sender,
 			receiver: map_receiver,
 			next_board_id: 1,
+			assets_receiver,
 		}
 	}
 
 	pub fn try_play_music(&mut self) {
-		if get_time() as f32 > self.next_music_play {
-			let index = rand::gen_range(0, self.music.len());
-			play_sound_once(self.music[index]);
-			set_sound_volume(self.music[index], self.persistance.master_volume);
-			self.next_music_play = get_time() as f32 + MUSIC_LENGTHS[index];
+		if let Some(music) = &self.music {
+			if get_time() as f32 > self.next_music_play {
+				let index = rand::gen_range(0, music.len());
+				play_sound_once(music[index]);
+				set_sound_volume(music[index], self.persistance.master_volume);
+				self.next_music_play = get_time() as f32 + MUSIC_LENGTHS[index];
+			}
+		}
+		else {
+			if let Ok((music, sfx)) = self.assets_receiver.try_recv() {
+				let index = rand::gen_range(0, music.len());
+				play_sound_once(music[index]);
+				set_sound_volume(music[index], self.persistance.master_volume);
+
+				self.music = Some(music);
+				self.sfx = Some(sfx);
+			}
+
 		}
 	}
 
 	pub fn play_sound(&self, id: usize) {
-		play_sound(self.sfx[id], PlaySoundParams { looped: false, volume: SFX_VOLUMES[id] * self.persistance.master_volume });
+		if let Some(sfx) = &self.sfx {
+			play_sound(sfx[id], PlaySoundParams { looped: false, volume: SFX_VOLUMES[id] * self.persistance.master_volume });
+		}
 	}
 
 	pub fn update_volume(&mut self) {
-		for m in self.music.iter_mut() {
-			set_sound_volume(*m, self.persistance.master_volume);
+		if let Some(music) = &mut self.music {
+			for m in music.iter_mut() {
+				set_sound_volume(*m, self.persistance.master_volume);
+			}
 		}
 	}
 

@@ -12,10 +12,9 @@ use takuzu::{state::State, assets::Assets};
 
 		logo
 
-		music/scf volume
+		music/sfx volume
 		sandbox lock/unlock
 		zoom :weary:
-
 
 		no countdown in serious mode when waiting for generation
 
