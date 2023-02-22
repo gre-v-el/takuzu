@@ -9,8 +9,6 @@ use takuzu::{state::State, assets::Assets};
 		tutorial
 		difficulty choice (how many tiles)
 
-		logo
-
 		sandbox lock/unlock
 		zoom :weary:
 

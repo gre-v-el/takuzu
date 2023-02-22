@@ -55,6 +55,15 @@ impl State {
 				let cam = Camera2D::from_display_rect(rect_circumscribed_on_rect(display_area, screen_width()/screen_height()));
 				set_camera(&cam);
 				
+				let w = 0.4;
+				draw_texture_ex(assets.banner, 0.5-w/2.0, 0.1, WHITE, DrawTextureParams { 
+					dest_size: Some(vec2(w, w/assets.banner.width()*assets.banner.height())), 
+					source: None, 
+					rotation: 0.0, 
+					flip_x: false, 
+					flip_y: false, 
+					pivot: None 
+				});
 				
 				if button(&Rect{x: 0.3, y: 0.28, w: 0.4, h: 0.1}, PRI_BUTTON_COL, "SANDBOX", &cam, font, 0.06) && handle_mouse {
 					let mut board = Board::new(assets.persistance.game_size, 0, false);

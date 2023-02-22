@@ -11,6 +11,7 @@ pub struct Assets {
 	pub font: Font,
 	pub gradient: Texture2D,
 	pub lock: Texture2D,
+	pub banner: Texture2D,
 	pub persistance: Persistance,
 	pub materials: Vec<Material>,
 	pub material: usize,
@@ -29,6 +30,7 @@ pub struct Assets {
 impl Assets {
 	pub fn get() -> Self {
 		let persistance = Persistance::load();
+		// persistance.highscores = [Some(0.38), Some(3.08), Some(21.09), Some(63.50), Some(235.66), None, None, None, None, Some(2965.86)];
 		let mut materials = Vec::new();
 		let paths = fs::read_dir("src/shaders").unwrap();
 
@@ -100,6 +102,7 @@ impl Assets {
 			font: load_ttf_font_from_bytes(crate::FONT).unwrap(),
 			gradient: Texture2D::from_file_with_format(crate::GRADIENT, None),
 			lock: Texture2D::from_file_with_format(crate::LOCK, None),
+			banner: Texture2D::from_file_with_format(crate::BANNER, None),
 			persistance,
 			material: rand::gen_range(0, materials.len()),
 			materials,

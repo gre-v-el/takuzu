@@ -12,6 +12,7 @@ pub mod assets;
 const FONT: &[u8] = include_bytes!("../assets/Jellee-Bold.ttf");
 const GRADIENT: &[u8] = include_bytes!("../assets/gradient.png");
 const LOCK: &[u8] = include_bytes!("../assets/lock.png");
+const BANNER: &[u8] = include_bytes!("../assets/banner.png");
 
 const MUSIC: [&[u8]; 4] = [
 	include_bytes!("../assets/music/abstract-world-127012.ogg"),
