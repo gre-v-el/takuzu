@@ -105,7 +105,7 @@ impl State {
 							vec![None, False(false), False(false), False(false)],
 							vec![True(false), None, True(false), None],
 							vec![False(false), False(false), None, True(false)],
-						], 
+						],
 						error: [Option::Some((1, 1, 3, 1)), Option::None],
 						error_time: 0.0,
 						hint: Some((2, 3)),
@@ -552,7 +552,7 @@ impl State {
 			}
 			Self::Settings(board) => {
 
-				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.7, y: -1.5, w: 2.4, h: 2.6 }, screen_width()/screen_height());
+				let display_rect = rect_circumscribed_on_rect(Rect { x: -1.1, y: -1.3, w: 2.4, h: 2.6 }, screen_width()/screen_height());
 				let camera = Camera2D::from_display_rect(display_rect);
 				set_camera(&camera);
 
@@ -577,25 +577,32 @@ impl State {
 					assets.persistance.color2 = Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into();
 				}
 
-				let mut v = assets.persistance.master_volume;
-				slider(&mut v, 0.0, 2.0, vec2(-0.05, 0.15), 0.55, SLIDER_COL, &camera);
-				draw_centered_text(vec2(0.225, 0.07), "Master Volume", font, 0.07);
-				if v != assets.persistance.master_volume {
-					assets.persistance.master_volume = v;
+				let mut v = assets.persistance.music_volume;
+				slider(&mut v, 0.0, 2.0, vec2(0.45, 0.15), 0.55, SLIDER_COL, &camera);
+				draw_centered_text(vec2(0.725, 0.07), "Music Volume", font, 0.07);
+				if v != assets.persistance.music_volume {
+					assets.persistance.music_volume = v;
 					assets.update_volume();
 				}
 
-				slider(&mut assets.persistance.color0[0], 0.0, 1.0, vec2(-0.05, 0.25), 0.3, color_u8!(255, 0, 0, 255), &camera);
-				slider(&mut assets.persistance.color0[1], 0.0, 1.0, vec2(-0.05, 0.35), 0.3, color_u8!(0, 255, 0, 255), &camera);
-				slider(&mut assets.persistance.color0[2], 0.0, 1.0, vec2(-0.05, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
+				let mut v = assets.persistance.sfx_volume;
+				slider(&mut v, 0.0, 2.0, vec2(0.45, 0.35), 0.55, SLIDER_COL, &camera);
+				draw_centered_text(vec2(0.725, 0.27), "Sfx Volume", font, 0.07);
+				if v != assets.persistance.sfx_volume {
+					assets.persistance.sfx_volume = v;
+				}
 
-				slider(&mut assets.persistance.color1[0], 0.0, 1.0, vec2(0.35, 0.25), 0.3, color_u8!(255, 0, 0, 255), &camera);
-				slider(&mut assets.persistance.color1[1], 0.0, 1.0, vec2(0.35, 0.35), 0.3, color_u8!(0, 255, 0, 255), &camera);
-				slider(&mut assets.persistance.color1[2], 0.0, 1.0, vec2(0.35, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
+				slider(&mut assets.persistance.color0[0], 0.0, 1.0, vec2(-0.05, 0.15), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color0[1], 0.0, 1.0, vec2(-0.05, 0.24), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color0[2], 0.0, 1.0, vec2(-0.05, 0.33), 0.3, color_u8!(0, 0, 255, 255), &camera);
 
-				slider(&mut assets.persistance.color2[0], 0.0, 1.0, vec2(0.75, 0.25), 0.3, color_u8!(255, 0, 0, 255), &camera);
-				slider(&mut assets.persistance.color2[1], 0.0, 1.0, vec2(0.75, 0.35), 0.3, color_u8!(0, 255, 0, 255), &camera);
-				slider(&mut assets.persistance.color2[2], 0.0, 1.0, vec2(0.75, 0.45), 0.3, color_u8!(0, 0, 255, 255), &camera);
+				slider(&mut assets.persistance.color1[0], 0.0, 1.0, vec2(-0.05, 0.46), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color1[1], 0.0, 1.0, vec2(-0.05, 0.55), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color1[2], 0.0, 1.0, vec2(-0.05, 0.64), 0.3, color_u8!(0, 0, 255, 255), &camera);
+
+				slider(&mut assets.persistance.color2[0], 0.0, 1.0, vec2(-0.05, 0.77), 0.3, color_u8!(255, 0, 0, 255), &camera);
+				slider(&mut assets.persistance.color2[1], 0.0, 1.0, vec2(-0.05, 0.86), 0.3, color_u8!(0, 255, 0, 255), &camera);
+				slider(&mut assets.persistance.color2[2], 0.0, 1.0, vec2(-0.05, 0.95), 0.3, color_u8!(0, 0, 255, 255), &camera);
 			}
 			Self::Attribution => {
 				let display_rect = rect_circumscribed_on_rect(Rect { x: -0.1, y: -0.2, w: 1.2, h: 1.3 }, screen_width()/screen_height());

@@ -119,7 +119,7 @@ impl Assets {
 			if get_time() as f32 > self.next_music_play {
 				let index = rand::gen_range(0, music.len());
 				play_sound_once(music[index]);
-				set_sound_volume(music[index], self.persistance.master_volume);
+				set_sound_volume(music[index], self.persistance.music_volume);
 				self.next_music_play = get_time() as f32 + MUSIC_LENGTHS[index];
 			}
 		}
@@ -138,14 +138,14 @@ impl Assets {
 
 	pub fn play_sound(&self, id: usize) {
 		if let Some(sfx) = &self.sfx {
-			play_sound(sfx[id], PlaySoundParams { looped: false, volume: SFX_VOLUMES[id] * self.persistance.master_volume });
+			play_sound(sfx[id], PlaySoundParams { looped: false, volume: SFX_VOLUMES[id] * self.persistance.sfx_volume });
 		}
 	}
 
 	pub fn update_volume(&mut self) {
 		if let Some(music) = &mut self.music {
 			for m in music.iter_mut() {
-				set_sound_volume(*m, self.persistance.master_volume);
+				set_sound_volume(*m, self.persistance.music_volume);
 			}
 		}
 	}
@@ -200,7 +200,8 @@ pub struct Persistance {
 	pub color1: [f32; 4],
 	pub color2: [f32; 4],
 	pub game_size: usize,
-	pub master_volume: f32,
+	pub music_volume: f32,
+	pub sfx_volume: f32,
 }
 
 impl Persistance {
@@ -239,7 +240,8 @@ impl Persistance {
 						color1: Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into(),
 						color2: Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into(),
 						game_size: 4,
-						master_volume: 1.0,
+						music_volume: 1.0,
+						sfx_volume: 1.0,
 					}
 				}
 			},
@@ -250,7 +252,8 @@ impl Persistance {
 					color1: Color { r: 1.0, g: 0.5, b: 0.0, a: 1.0 }.into(),
 					color2: Color { r: 0.0, g: 0.5, b: 1.0, a: 1.0 }.into(),
 					game_size: 4,
-					master_volume: 1.0,
+					music_volume: 1.0,
+					sfx_volume: 1.0,
 				}
 			}
 		}

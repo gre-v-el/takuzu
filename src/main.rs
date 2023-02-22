@@ -11,13 +11,12 @@ use takuzu::{state::State, assets::Assets};
 
 		logo
 
-		music/sfx volume + settings relayout
 		sandbox lock/unlock
 		zoom :weary:
 
 		sandbox algorithms multithreading
 
-		check if the board is generating for more than a second, and only then fade
+		adjust allocated spaces to really used ones
 */
 
 fn window_config() -> Conf {
