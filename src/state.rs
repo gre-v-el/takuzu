@@ -77,12 +77,15 @@ impl State {
 				
 				if button(&Rect{x: 0.2, y: 0.29, w: 0.08, h: 0.08}, SEC_BUTTON_COL, "?", &cam, font, 0.05) && handle_mouse {
 					ret = Some(Self::ModeInfo(GameMode::Sandbox));
+					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.2, y: 0.40, w: 0.08, h: 0.08}, SEC_BUTTON_COL, "?", &cam, font, 0.05) && handle_mouse {
 					ret = Some(Self::ModeInfo(GameMode::Learn));
+					assets.play_sound(FORWARD);
 				}
 				if button(&Rect{x: 0.2, y: 0.51, w: 0.08, h: 0.08}, SEC_BUTTON_COL, "?", &cam, font, 0.05) && handle_mouse {
 					ret = Some(Self::ModeInfo(GameMode::Serious));
+					assets.play_sound(FORWARD);
 				}
 
 				if button(&Rect{x: 0.3, y: 0.7, w: 0.4, h: 0.1}, SEC_BUTTON_COL, "HIGHSCORES", &cam, font, 0.05) && handle_mouse {
@@ -108,7 +111,8 @@ impl State {
 						hint: Some((2, 3)),
 						show_locked: Option::None,
 						last_error_sound: -1.0,
-						generation_time: -1.0,
+						generation_end_time: -1.0,
+						generation_duration: -1.0,
 						is_generating: false,
 					}; 
 					ret = Some(State::Settings(board));
@@ -117,6 +121,7 @@ impl State {
 
 				if button(&Rect { x: 0.76, y: 0.9, w: 0.21, h: 0.07 }, SEC_BUTTON_COL, "Attribution", &cam, font, 0.03) {
 					ret = Some(Self::Attribution);
+					assets.play_sound(FORWARD);
 				}
 			}
 			Self::DifficultyChoice(board, next, size) => {
@@ -643,20 +648,22 @@ impl State {
 		ret
 	}
 
-	pub fn capture_generated_map(&mut self, map_size: usize, map: Vec<Vec<CellState>>, id: usize) {
+	pub fn capture_generated_map(&mut self, map_size: usize, map: Vec<Vec<CellState>>, id: usize, time: f32) {
 		match self {
 			Self::Learn(board) => {
 				if board.id != id || board.size != map_size || !board.is_generating { return; }
 				board.map = map;
 				board.is_generating = false;
-				board.generation_time = get_time() as f32;
+				board.generation_end_time = get_time() as f32;
+				board.generation_duration = time;
 			}
 			Self::Serious(board, start, _, _) => {
 				if board.id != id || board.size != map_size || !board.is_generating { return; }
 				board.map = map;
 				board.is_generating = false;
 				*start = get_time() as f32 + 1.5;
-				board.generation_time = get_time() as f32;
+				board.generation_end_time = get_time() as f32;
+				board.generation_duration = time;
 			}
 			_ => {}
 		}

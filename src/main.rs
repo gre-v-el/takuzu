@@ -16,6 +16,8 @@ use takuzu::{state::State, assets::Assets};
 		zoom :weary:
 
 		sandbox algorithms multithreading
+
+		check if the board is generating for more than a second, and only then fade
 */
 
 fn window_config() -> Conf {
@@ -43,8 +45,8 @@ async fn main() {
 			state = s;
 		}
 
-		if let Ok((map, id)) = assets.receiver.try_recv() {
-			state.capture_generated_map(map.len(), map, id);
+		if let Ok((map, id, time)) = assets.receiver.try_recv() {
+			state.capture_generated_map(map.len(), map, id, time);
 		}
 
         next_frame().await

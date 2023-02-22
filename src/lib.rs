@@ -30,7 +30,7 @@ const SFX: [&[u8]; 7] = [
 	include_bytes!("../assets/sfx/hint.ogg"),
 	include_bytes!("../assets/sfx/tick.ogg"),
 ];
-const SFX_VOLUMES: [f32; 7] = [0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+const SFX_VOLUMES: [f32; 7] = [0.6, 1.0, 1.0, 1.0, 3.0, 1.0, 2.0];
 
 const POP: usize = 0;
 const FORWARD: usize = 1;
@@ -66,7 +66,7 @@ pub fn generation_animation_cell_col(x: f32, y: f32, size: f32, assets: &Assets)
 	let col = (angle / 2.0 / PI + get_time() as f32 * 0.3) % 1.0;
 
 	let mut col = col_lerp(assets.persistance.color2.into(), assets.persistance.color1.into(), col);
-	col.a = 0.1;
+	col.a = 0.3;
 
 	col
 }

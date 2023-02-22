@@ -9,7 +9,8 @@ pub struct Board {
 	pub is_won: bool,
 	pub is_valid: bool,
 	pub is_generating: bool,
-	pub generation_time: f32,
+	pub generation_end_time: f32,
+	pub generation_duration: f32,
 	pub size: usize,
 	pub map: Vec<Vec<CellState>>,
 	pub error: [Option<(usize, usize, usize, usize)>; 2], // up to two regions on the board
@@ -33,7 +34,8 @@ impl Board {
 			show_locked: None,
 			last_error_sound: -1.0,
 			id: id,
-			generation_time: -1.0,
+			generation_end_time: -1.0,
+			generation_duration: -1.0,
 		};
 
 		s
@@ -258,13 +260,13 @@ impl Board {
 					if self.is_generating {
 						generation_animation_cell_col(x as f32, y as f32, self.size as f32, assets)
 					} 
-					else if get_time() as f32 - self.generation_time > 1.0 {
+					else if get_time() as f32 - self.generation_end_time > 1.0 || self.generation_duration < 0.1 {
 						cell.col(assets)
 					}
 					else {
 						let a = generation_animation_cell_col(x as f32, y as f32, self.size as f32, &assets);
 						let b = cell.col(assets);
-						let t = get_time() as f32 - self.generation_time;
+						let t = get_time() as f32 - self.generation_end_time;
 						col_lerp(a, b, t)
 					};
 				let x = x as f32 / self.size as f32;
@@ -325,7 +327,7 @@ impl Board {
 	}
 
 	pub fn get_error_alpha(&self) -> f32 {
-		let t = (get_time() as f32 - self.error_time - 0.3).max(0.0);
+		let t = (get_time() as f32 - self.error_time - 1.0).max(0.0);
 		1.0-((5.0*t).cos() * 0.5 + 0.5)
 	}
 

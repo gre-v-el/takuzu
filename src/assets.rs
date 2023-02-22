@@ -1,4 +1,4 @@
-use std::{fs::{File, self}, io::{Read, Write}, thread, sync::mpsc::{Receiver, Sender, channel}};
+use std::{fs::{File, self}, io::{Read, Write}, thread, sync::mpsc::{Receiver, Sender, channel}, time::Instant};
 use pollster::FutureExt;
 
 use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams, set_sound_volume, play_sound_once}};
@@ -20,7 +20,7 @@ pub struct Assets {
 	pub sfx: Option<Vec<Sound>>,
 	pub assets_receiver: Receiver<(Vec<Sound>, Vec<Sound>)>,
 
-	pub receiver: Receiver<(Vec<Vec<CellState>>, usize)>,
+	pub receiver: Receiver<(Vec<Vec<CellState>>, usize, f32)>, // map, id, time
 	pub sender: Sender<(usize, GameMode, usize)>,
 
 	pub next_board_id: usize,
@@ -67,7 +67,7 @@ impl Assets {
 
 
 		// map, board_id
-		let (map_sender, map_receiver) = channel::<(Vec<Vec<CellState>>, usize)>();
+		let (map_sender, map_receiver) = channel::<(Vec<Vec<CellState>>, usize, f32)>();
 
 		// map_size, game_mode, board_id
 		let (order_sender, order_receiver) = channel::<(usize, GameMode, usize)>();
@@ -75,12 +75,13 @@ impl Assets {
 		thread::spawn(move || {
 			loop {
 				let (size, mode, id) = order_receiver.recv().unwrap();
+				let start = Instant::now();
 				let board = match mode {
 					GameMode::Sandbox => Board::new(size, 0, false),
 					GameMode::Learn => Board::new_learn(size, 0),
 					GameMode::Serious => Board::new_serious(size, 0),
 				};
-				map_sender.send((board.map, id)).unwrap();
+				map_sender.send((board.map, id, start.elapsed().as_secs_f32())).unwrap();
 			}
 		});
 
