@@ -1,5 +1,5 @@
 use std::{time::{SystemTime, UNIX_EPOCH}};
-use macroquad::{self, prelude::*};
+use macroquad::{self, prelude::*, miniquad::conf::Icon};
 use takuzu::{state::State, assets::Assets};
 
 /*
@@ -23,6 +23,7 @@ fn window_config() -> Conf {
         fullscreen: false,
 		window_width: 500,
 		window_height: 500,
+		icon: Some(Icon::miniquad_logo()),
         ..Default::default()
     }
 }

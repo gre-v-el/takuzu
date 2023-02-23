@@ -1,10 +1,10 @@
 use std::{fs::{File, self}, io::{Read, Write}, thread, sync::mpsc::{Receiver, Sender, channel}, time::Instant};
 use pollster::FutureExt;
 
-use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams, set_sound_volume, play_sound_once}};
+use macroquad::{prelude::*, miniquad::{BlendState, Equation, BlendFactor, BlendValue, RenderPass}, audio::{Sound, load_sound_from_bytes, play_sound, PlaySoundParams, set_sound_volume, play_sound_once}};
 use nanoserde::{DeBin, SerBin};
 
-use crate::{MUSIC, SFX, SFX_VOLUMES, MUSIC_LENGTHS, cell_state::CellState, state::GameMode, board::Board};
+use crate::{MUSIC, SFX, SFX_VOLUMES, MUSIC_LENGTHS, cell_state::CellState, state::GameMode, board::Board, BACKGROUND_FACTOR};
 
 
 pub struct Assets {
@@ -25,6 +25,8 @@ pub struct Assets {
 	pub sender: Sender<(usize, GameMode, usize)>,
 
 	pub next_board_id: usize,
+
+	pub background_render_target: RenderTarget,
 }
 
 impl Assets {
@@ -114,6 +116,7 @@ impl Assets {
 			receiver: map_receiver,
 			next_board_id: 1,
 			assets_receiver,
+			background_render_target: render_target((screen_width()/crate::BACKGROUND_FACTOR) as u32, (screen_height()/crate::BACKGROUND_FACTOR) as u32),
 		}
 	}
 
@@ -165,10 +168,15 @@ impl Assets {
 	}
 
 	pub fn draw_material(&mut self) {
+		if (screen_width()/BACKGROUND_FACTOR) as u32 != self.background_render_target.texture.width() as u32 || (screen_height()/BACKGROUND_FACTOR) as u32 != self.background_render_target.texture.height() as u32 {
+			self.background_render_target = render_target((screen_width()/BACKGROUND_FACTOR) as u32, (screen_height()/BACKGROUND_FACTOR) as u32);
+		}
 
-		set_camera(&Camera2D::from_display_rect(Rect{x: 0.0, y: 0.0, w: 1.0, h: 1.0}));
+		let mut cam = Camera2D::from_display_rect(Rect{x: 0.0, y: 0.0, w: 1.0, h: 1.0});
+		cam.render_target = Some(self.background_render_target);
+		set_camera(&cam);
 
-		self.material().set_uniform("resolution", (screen_width(), screen_height()));
+		self.material().set_uniform("resolution", (screen_width()/BACKGROUND_FACTOR, screen_height()/BACKGROUND_FACTOR));
 		self.material().set_uniform("time", get_time() as f32);
 		self.material().set_uniform("alpha", 1.0f32);
 
@@ -178,7 +186,7 @@ impl Assets {
 		
 		if let Some((id, time)) = self.secondary_material {
 			let a = 1.0 - (get_time() as f32 - time) / 5.0;
-			self.materials[id].set_uniform("resolution", (screen_width(), screen_height()));
+			self.materials[id].set_uniform("resolution", (screen_width()/BACKGROUND_FACTOR, screen_height()/BACKGROUND_FACTOR));
 			self.materials[id].set_uniform("time", get_time() as f32);
 			self.materials[id].set_uniform("alpha", a);
 
@@ -190,9 +198,11 @@ impl Assets {
 				self.secondary_material = None;
 			}
 		}
-
 		
 		gl_use_default_material();
+
+		set_camera(&Camera2D::from_display_rect(Rect{x: 0.0, y: 0.0, w: 1.0, h: 1.0}));
+		draw_texture_ex(self.background_render_target.texture, 0.0, 0.0, WHITE, DrawTextureParams { dest_size: Some(vec2(1.0, 1.0)), ..Default::default() });
 	}
 }
 
