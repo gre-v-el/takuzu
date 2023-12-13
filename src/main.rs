@@ -1,4 +1,4 @@
-use std::{time::{SystemTime, UNIX_EPOCH}};
+use std::time::{SystemTime, UNIX_EPOCH};
 use macroquad::{self, prelude::*, miniquad::conf::Icon};
 use takuzu::{state::State, assets::Assets};
 
